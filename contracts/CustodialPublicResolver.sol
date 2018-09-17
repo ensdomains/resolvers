@@ -58,6 +58,6 @@ contract CustodialPublicResolver is PublicResolver {
 
         require(SignatureValidator.isValidSignature(keccak256(abi.encodePacked(message, nonce)), owner, signature));
 
-        nonce[owner] += 1; // @todo SafeMath
+        nonce[owner] += 1;
     }
 }
