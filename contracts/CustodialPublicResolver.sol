@@ -55,6 +55,8 @@ contract CustodialPublicResolver is PublicResolver {
 
     function setAddrOnBehalfOf(bytes32 node, address addr, uint256 nonce, address signer, bytes signature) public {
         validateSignature(keccak256(SET_ADDR_HASH_SCHEME, keccak256(node, addr, nonce)), signer, signature);
+        records[node].addr = addr;
+        AddrChanged(node, addr);
     }
 
     function setContentOnBehalfOf(bytes32 node, bytes32 hash, uint256 nonce, address signer, bytes signature) public {
