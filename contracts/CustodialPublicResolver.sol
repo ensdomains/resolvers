@@ -7,32 +7,32 @@ contract CustodialPublicResolver is PublicResolver {
 
     mapping (address => uint256) public nonce;
 
-    function setAddrFor(bytes32 node, address addr, uint256 nonce, bytes signature) public {
-        validateSignature(node, nonce, keccak256(node, addr, nonce), signature);
+    function setAddrFor(bytes32 node, address addr, bytes signature) public {
+        validateSignature(node, abi.encodePacked(node, addr), signature);
         records[node].addr = addr;
         emit AddrChanged(node, addr);
     }
 
-    function setContentFor(bytes32 node, bytes32 hash, uint256 nonce, bytes signature) public {
-        validateSignature(node, nonce, keccak256(node, hash, nonce), signature);
+    function setContentFor(bytes32 node, bytes32 hash, bytes signature) public {
+        validateSignature(node, abi.encodePacked(node, hash), signature);
         records[node].content = hash;
         emit ContentChanged(node, hash);
     }
 
-    function setMultihashFor(bytes32 node, bytes hash, uint256 nonce, bytes signature) public {
-        validateSignature(node, nonce, keccak256(node, hash, nonce), signature);
+    function setMultihashFor(bytes32 node, bytes hash, bytes signature) public {
+        validateSignature(node, abi.encodePacked(node, hash), signature);
         records[node].multihash = hash;
         emit MultihashChanged(node, hash);
     }
 
-    function setNameFor(bytes32 node, string name, uint256 nonce, bytes signature) public {
-        validateSignature(node, nonce, keccak256(node, name, nonce), signature);
+    function setNameFor(bytes32 node, string name, bytes signature) public {
+        validateSignature(node, abi.encodePacked(node, name), signature);
         records[node].name = name;
         emit NameChanged(node, name);
     }
 
-    function setABIFor(bytes32 node, uint256 contentType, bytes data, uint256 nonce, bytes signature) public {
-        validateSignature(node, nonce, keccak256(node, contentType, data, nonce), signature);
+    function setABIFor(bytes32 node, uint256 contentType, bytes data, bytes signature) public {
+        validateSignature(node, abi.encodePacked(node, contentType, data), signature);
 
         require(((contentType - 1) & contentType) == 0);
 
@@ -40,22 +40,26 @@ contract CustodialPublicResolver is PublicResolver {
         emit ABIChanged(node, contentType);
     }
 
-    function setPubkeyFor(bytes32 node, bytes32 x, bytes32 y, uint256 nonce, bytes signature) public {
-        validateSignature(node, nonce, keccak256(node, x, y, nonce), signature);
+    function setPubkeyFor(bytes32 node, bytes32 x, bytes32 y, bytes signature) public {
+        validateSignature(node, abi.encodePacked(node, x, y), signature);
         records[node].pubkey = PublicKey(x, y);
         emit PubkeyChanged(node, x, y);
     }
 
-    function setTextFor(bytes32 node, string key, string value, uint256 nonce, bytes signature) public {
-        validateSignature(node, nonce, keccak256(node, key, value, nonce), signature);
+    function setTextFor(bytes32 node, string key, string value, bytes signature) public {
+        validateSignature(node, abi.encodePacked(node, key, value), signature);
         records[node].text[key] = value;
         emit TextChanged(node, key, key);
     }
 
-    function validateSignature(bytes32 node, uint256 nonce, bytes32 hash, bytes signature) private {
+    function validateSignature(bytes32 node, bytes message, bytes signature) private {
+        address owner = ens.owner(node);
+        uint256 nonce = nonce[owner];
+
+        bytes32 hash = keccak256(abi.encodePacked(message, nonce));
         address signer = SignatureValidator.isValidSignature(hash, signer, signature);
-        require(nonce[signer] == nonce);
+
         require(ens.owner(node) == signer);
-        nonce[signature] += 1; // @todo SafeMath
+        nonce[owner] += 1; // @todo SafeMath
     }
 }
