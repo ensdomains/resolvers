@@ -1,9 +1,8 @@
 pragma solidity ^0.4.24;
 
-import "@ensdomains/ens/contracts/PublicResolver.sol";
+import "./PublicResolver.sol";
 import "@dexyproject/signature-validator/contracts/SignatureValidator.sol";
 
-// @todo think of a better name
 contract CustodialPublicResolver is PublicResolver {
 
     mapping (bytes32 => bool) public submitted;
