@@ -11,25 +11,25 @@ contract CustodialPublicResolver is PublicResolver {
     function setAddrOnBehalfOf(bytes32 node, address addr, uint256 nonce, bytes signature) public {
         validateSignature(node, keccak256(node, addr, nonce), signature);
         records[node].addr = addr;
-        AddrChanged(node, addr);
+        emit AddrChanged(node, addr);
     }
 
     function setContentOnBehalfOf(bytes32 node, bytes32 hash, uint256 nonce, bytes signature) public {
         validateSignature(node, keccak256(node, hash, nonce), signature);
         records[node].content = hash;
-        ContentChanged(node, hash);
+        emit ContentChanged(node, hash);
     }
 
     function setMultihashOnBehalfOf(bytes32 node, bytes hash, uint256 nonce, bytes signature) public {
         validateSignature(node, keccak256(node, hash, nonce), signature);
         records[node].multihash = hash;
-        MultihashChanged(node, hash);
+        emit MultihashChanged(node, hash);
     }
 
     function setNameOnBehalfOf(bytes32 node, string name, uint256 nonce, bytes signature) public {
         validateSignature(node, keccak256(node, name, nonce), signature);
         records[node].name = name;
-        NameChanged(node, name);
+        emit NameChanged(node, name);
     }
 
     function setABIOnBehalfOf(bytes32 node, uint256 contentType, bytes data, uint256 nonce, bytes signature) public {
@@ -38,19 +38,19 @@ contract CustodialPublicResolver is PublicResolver {
         require(((contentType - 1) & contentType) == 0);
 
         records[node].abis[contentType] = data;
-        ABIChanged(node, contentType);
+        emit ABIChanged(node, contentType);
     }
 
     function setPubkeyOnBehalfOf(bytes32 node, bytes32 x, bytes32 y, uint256 nonce, bytes signature) public {
         validateSignature(node, keccak256(node, x, y, nonce), signature);
         records[node].pubkey = PublicKey(x, y);
-        PubkeyChanged(node, x, y);
+        emit PubkeyChanged(node, x, y);
     }
 
     function setTextOnBehalfOf(bytes32 node, string key, string value, uint256 nonce, bytes signature) public {
         validateSignature(node, keccak256(node, key, value, nonce), signature);
         records[node].text[key] = value;
-        TextChanged(node, key, key);
+        emit TextChanged(node, key, key);
     }
 
     function validateSignature(bytes32 node, bytes32 hash, bytes signature) private {
