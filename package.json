@@ -1,0 +1,21 @@
+{
+  "name": "@ensdomains/resolver",
+  "version": "0.0.1",
+  "requires": true,
+  "lockfileVersion": 1,
+  "devDependencies": {
+    "eth-gas-reporter": "^0.1.2",
+    "solium": "^1.0.4",
+    "truffle": "^4.1.12",
+    "@ensdomains/ens": "^0.1.1",
+    "@dexyproject/signature-validator": "^1.1.0"
+  },
+  "scripts": {
+    "pretest": "truffle compile",
+    "test": "truffle test",
+    "watch": "npm-watch",
+    "lint": "solium --dir ./contracts",
+    "prepublishOnly": "truffle compile && truffle networks --clean"
+  },
+  "dependencies": {}
+}
