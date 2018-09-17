@@ -5,7 +5,7 @@ import "@dexyproject/signature-validator/contracts/SignatureValidator.sol";
 
 contract CustodialPublicResolver is PublicResolver {
 
-    mapping (address => uint256) public nonce;
+    mapping (address => uint256) public nonces;
 
     /**
      * Sets the address associated with an ENS node on behalf of someone.
@@ -103,10 +103,10 @@ contract CustodialPublicResolver is PublicResolver {
 
     function validateSignature(bytes32 node, bytes message, bytes signature) private {
         address owner = ens.owner(node);
-        uint256 nonce = nonce[owner];
+        uint256 nonce = nonces[owner];
 
         require(SignatureValidator.isValidSignature(keccak256(abi.encodePacked(message, nonce)), owner, signature));
 
-        nonce[owner] += 1;
+        nonces[owner] += 1;
     }
 }
