@@ -56,10 +56,8 @@ contract CustodialPublicResolver is PublicResolver {
         address owner = ens.owner(node);
         uint256 nonce = nonce[owner];
 
-        bytes32 hash = keccak256(abi.encodePacked(message, nonce));
-        address signer = SignatureValidator.isValidSignature(hash, signature);
+        require(SignatureValidator.isValidSignature(keccak256(abi.encodePacked(message, nonce)), owner, signature));
 
-        require(ens.owner(node) == signer);
         nonce[owner] += 1; // @todo SafeMath
     }
 }
