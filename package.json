@@ -8,7 +8,6 @@
     "solium": "^1.0.4",
     "truffle": "^4.1.12",
     "@ensdomains/ens": "^0.1.1",
-    "@dexyproject/signature-validator": "^1.1.0",
     "eth-ens-namehash": "^2.0.8"
   },
   "scripts": {

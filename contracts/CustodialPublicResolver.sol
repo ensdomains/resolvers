@@ -1,7 +1,6 @@
 pragma solidity ^0.4.24;
 
 import "./PublicResolver.sol";
-import "@dexyproject/signature-validator/contracts/SignatureValidator.sol";
 
 contract CustodialPublicResolver is PublicResolver {
 
@@ -105,8 +104,21 @@ contract CustodialPublicResolver is PublicResolver {
         address owner = ens.owner(node);
         uint256 nonce = nonces[owner];
 
-        require(SignatureValidator.isValidSignature(keccak256(abi.encodePacked(message, nonce)), owner, signature));
+        require(recover(keccak256(abi.encodePacked(message, nonce)), signature) == owner);
 
         nonces[owner] += 1;
+    }
+
+    function recover(bytes32 hash, bytes signature) private returns (address) {
+        uint8 v = uint8(signature[0]);
+        bytes32 r;
+        bytes32 s;
+
+        assembly {
+            r := mload(add(signature, 33))
+            s := mload(add(signature, 65))
+        }
+
+        return ecrecover(keccak256("\x19Ethereum Signed Message:\n32", hash), v, r, s);
     }
 }
