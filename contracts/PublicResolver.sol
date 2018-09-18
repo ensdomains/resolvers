@@ -44,7 +44,7 @@ contract PublicResolver {
 
     mapping (bytes32 => Record) records;
 
-    modifier only_owner(bytes32 node) {
+    modifier onlyOwner(bytes32 node) {
         require(ens.owner(node) == msg.sender);
         _;
     }
@@ -63,7 +63,7 @@ contract PublicResolver {
      * @param node The node to update.
      * @param addr The address to set.
      */
-    function setAddr(bytes32 node, address addr) public only_owner(node) {
+    function setAddr(bytes32 node, address addr) public onlyOwner(node) {
         records[node].addr = addr;
         emit AddrChanged(node, addr);
     }
@@ -76,7 +76,7 @@ contract PublicResolver {
      * @param node The node to update.
      * @param hash The content hash to set
      */
-    function setContent(bytes32 node, bytes32 hash) public only_owner(node) {
+    function setContent(bytes32 node, bytes32 hash) public onlyOwner(node) {
         records[node].content = hash;
         emit ContentChanged(node, hash);
     }
@@ -87,7 +87,7 @@ contract PublicResolver {
      * @param node The node to update.
      * @param hash The multihash to set
      */
-    function setMultihash(bytes32 node, bytes hash) public only_owner(node) {
+    function setMultihash(bytes32 node, bytes hash) public onlyOwner(node) {
         records[node].multihash = hash;
         emit MultihashChanged(node, hash);
     }
@@ -98,7 +98,7 @@ contract PublicResolver {
      * @param node The node to update.
      * @param name The name to set.
      */
-    function setName(bytes32 node, string name) public only_owner(node) {
+    function setName(bytes32 node, string name) public onlyOwner(node) {
         records[node].name = name;
         emit NameChanged(node, name);
     }
@@ -111,7 +111,7 @@ contract PublicResolver {
      * @param contentType The content type of the ABI
      * @param data The ABI data.
      */
-    function setABI(bytes32 node, uint256 contentType, bytes data) public only_owner(node) {
+    function setABI(bytes32 node, uint256 contentType, bytes data) public onlyOwner(node) {
         // Content types must be powers of 2
         require(((contentType - 1) & contentType) == 0);
 
@@ -125,7 +125,7 @@ contract PublicResolver {
      * @param x the X coordinate of the curve point for the public key.
      * @param y the Y coordinate of the curve point for the public key.
      */
-    function setPubkey(bytes32 node, bytes32 x, bytes32 y) public only_owner(node) {
+    function setPubkey(bytes32 node, bytes32 x, bytes32 y) public onlyOwner(node) {
         records[node].pubkey = PublicKey(x, y);
         emit PubkeyChanged(node, x, y);
     }
@@ -137,7 +137,7 @@ contract PublicResolver {
      * @param key The key to set.
      * @param value The text data value to set.
      */
-    function setText(bytes32 node, string key, string value) public only_owner(node) {
+    function setText(bytes32 node, string key, string value) public onlyOwner(node) {
         records[node].text[key] = value;
         emit TextChanged(node, key, key);
     }
@@ -226,7 +226,7 @@ contract PublicResolver {
      * @return True if the contract implements the requested interface.
      */
     function supportsInterface(bytes4 interfaceID) public pure returns (bool) {
-        return interfaceID == ADDR_INTERFACE_ID ||
+        return interfaceID == ADDR_INTERFACE_ID || 
         interfaceID == CONTENT_INTERFACE_ID ||
         interfaceID == NAME_INTERFACE_ID ||
         interfaceID == ABI_INTERFACE_ID ||
