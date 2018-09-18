@@ -10,7 +10,7 @@ contract('PublicResolver', function (accounts) {
     let ens, resolver;
 
     beforeEach(async () => {
-        node = namehash('eth');
+        node = namehash.hash('eth');
         ens = await ENS.new();
         resolver = await PublicResolver.new(ens.address);
         await ens.setSubnodeOwner(0, web3.sha3('eth'), accounts[0], {from: accounts[0]});
