@@ -226,7 +226,7 @@ contract PublicResolver {
      * @return True if the contract implements the requested interface.
      */
     function supportsInterface(bytes4 interfaceID) public pure returns (bool) {
-        return interfaceID == ADDR_INTERFACE_ID || 
+        return interfaceID == ADDR_INTERFACE_ID ||
         interfaceID == CONTENT_INTERFACE_ID ||
         interfaceID == NAME_INTERFACE_ID ||
         interfaceID == ABI_INTERFACE_ID ||
