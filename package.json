@@ -8,7 +8,8 @@
     "solium": "^1.0.4",
     "truffle": "^4.1.12",
     "@ensdomains/ens": "^0.1.1",
-    "eth-ens-namehash": "^2.0.8"
+    "eth-ens-namehash": "^2.0.8",
+    "ethereumjs-util": "^5.1.5"
   },
   "scripts": {
     "pretest": "truffle compile",

@@ -6,6 +6,8 @@ contract CustodialPublicResolver is PublicResolver {
 
     mapping (address => uint256) public nonces;
 
+    constructor(ENS ens) public PublicResolver(ens) { }
+
     /**
      * Sets the address associated with an ENS node on behalf of someone.
      * @param node The node to update.
