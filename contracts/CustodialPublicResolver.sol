@@ -19,29 +19,15 @@ contract CustodialPublicResolver is PublicResolver {
     }
 
     /**
-     * Sets the content hash associated with an ENS node on behalf of someone.
-     * Note that this resource type is not standardized, and will likely change
-     * in future to a resource type based on multihash.
+     * Sets the multiaddr associated with an ENS node on behalf of someone.
      * @param node The node to update.
-     * @param hash The content hash to set.
+     * @param addr The multiaddr to set.
      * @param signature Signature signed by the node owner.
      */
-    function setContentFor(bytes32 node, bytes32 hash, bytes signature) public {
-        validateSignature(node, abi.encodePacked(node, hash), signature);
-        records[node].content = hash;
-        emit ContentChanged(node, hash);
-    }
-
-    /**
-     * Sets the multihash associated with an ENS node on behalf of someone.
-     * @param node The node to update.
-     * @param hash The multihash to set.
-     * @param signature Signature signed by the node owner.
-     */
-    function setMultihashFor(bytes32 node, bytes hash, bytes signature) public {
-        validateSignature(node, abi.encodePacked(node, hash), signature);
-        records[node].multihash = hash;
-        emit MultihashChanged(node, hash);
+    function setMultiaddrFor(bytes32 node, bytes addr, bytes signature) public {
+        validateSignature(node, abi.encodePacked(node, addr), signature);
+        records[node].multiaddr = addr;
+        emit MultiaddrChanged(node, addr);
     }
 
     /**
