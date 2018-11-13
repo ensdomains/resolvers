@@ -10,20 +10,18 @@ contract PublicResolver {
 
     bytes4 constant INTERFACE_META_ID = 0x01ffc9a7;
     bytes4 constant ADDR_INTERFACE_ID = 0x3b3b57de;
-    bytes4 constant CONTENT_INTERFACE_ID = 0xd8389dc5;
     bytes4 constant NAME_INTERFACE_ID = 0x691f3431;
     bytes4 constant ABI_INTERFACE_ID = 0x2203ab56;
     bytes4 constant PUBKEY_INTERFACE_ID = 0xc8690233;
     bytes4 constant TEXT_INTERFACE_ID = 0x59d1d43c;
-    bytes4 constant MULTIHASH_INTERFACE_ID = 0xe89401a1;
+    bytes4 constant MULTIADDR_INTERFACE_ID = 0x4cb7724c;
 
     event AddrChanged(bytes32 indexed node, address a);
-    event ContentChanged(bytes32 indexed node, bytes32 hash);
     event NameChanged(bytes32 indexed node, string name);
     event ABIChanged(bytes32 indexed node, uint256 indexed contentType);
     event PubkeyChanged(bytes32 indexed node, bytes32 x, bytes32 y);
     event TextChanged(bytes32 indexed node, string indexedKey, string key);
-    event MultihashChanged(bytes32 indexed node, bytes hash);
+    event MultiaddrChanged(bytes32 indexed node, bytes addr);
 
     struct PublicKey {
         bytes32 x;
@@ -32,12 +30,11 @@ contract PublicResolver {
 
     struct Record {
         address addr;
-        bytes32 content;
         string name;
         PublicKey pubkey;
         mapping(string=>string) text;
         mapping(uint256=>bytes) abis;
-        bytes multihash;
+        bytes multiaddr;
     }
 
     ENS ens;
@@ -66,30 +63,6 @@ contract PublicResolver {
     function setAddr(bytes32 node, address addr) public onlyOwner(node) {
         records[node].addr = addr;
         emit AddrChanged(node, addr);
-    }
-
-    /**
-     * Sets the content hash associated with an ENS node.
-     * May only be called by the owner of that node in the ENS registry.
-     * Note that this resource type is not standardized, and will likely change
-     * in future to a resource type based on multihash.
-     * @param node The node to update.
-     * @param hash The content hash to set
-     */
-    function setContent(bytes32 node, bytes32 hash) public onlyOwner(node) {
-        records[node].content = hash;
-        emit ContentChanged(node, hash);
-    }
-
-    /**
-     * Sets the multihash associated with an ENS node.
-     * May only be called by the owner of that node in the ENS registry.
-     * @param node The node to update.
-     * @param hash The multihash to set
-     */
-    function setMultihash(bytes32 node, bytes hash) public onlyOwner(node) {
-        records[node].multihash = hash;
-        emit MultihashChanged(node, hash);
     }
 
     /**
@@ -143,6 +116,17 @@ contract PublicResolver {
     }
 
     /**
+     * Sets the multiaddr associated with an ENS node.
+     * May only be called by the owner of that node in the ENS registry.
+     * @param node The node to update.
+     * @param addr The multiaddr to set
+     */
+    function setMultiaddr(bytes32 node, bytes addr) public onlyOwner(node) {
+        records[node].multiaddr = addr;
+        emit MultiaddrChanged(node, addr);
+    }
+
+    /**
      * Returns the text data associated with an ENS node and key.
      * @param node The ENS node to query.
      * @param key The text data key to query.
@@ -192,32 +176,22 @@ contract PublicResolver {
     }
 
     /**
-     * Returns the content hash associated with an ENS node.
-     * Note that this resource type is not standardized, and will likely change
-     * in future to a resource type based on multihash.
-     * @param node The ENS node to query.
-     * @return The associated content hash.
-     */
-    function content(bytes32 node) public view returns (bytes32) {
-        return records[node].content;
-    }
-
-    /**
-     * Returns the multihash associated with an ENS node.
-     * @param node The ENS node to query.
-     * @return The associated multihash.
-     */
-    function multihash(bytes32 node) public view returns (bytes) {
-        return records[node].multihash;
-    }
-
-    /**
      * Returns the address associated with an ENS node.
      * @param node The ENS node to query.
      * @return The associated address.
      */
     function addr(bytes32 node) public view returns (address) {
         return records[node].addr;
+    }
+
+
+    /**
+     * Returns the multiaddr associated with an ENS node.
+     * @param node The ENS node to query.
+     * @return The associated multiaddr.
+     */
+    function multiaddr(bytes32 node) public view returns (bytes) {
+        return records[node].multiaddr;
     }
 
     /**
@@ -227,12 +201,11 @@ contract PublicResolver {
      */
     function supportsInterface(bytes4 interfaceID) public pure returns (bool) {
         return interfaceID == ADDR_INTERFACE_ID ||
-        interfaceID == CONTENT_INTERFACE_ID ||
         interfaceID == NAME_INTERFACE_ID ||
         interfaceID == ABI_INTERFACE_ID ||
         interfaceID == PUBKEY_INTERFACE_ID ||
         interfaceID == TEXT_INTERFACE_ID ||
-        interfaceID == MULTIHASH_INTERFACE_ID ||
+        interfaceID == MULTIADDR_INTERFACE_ID ||
         interfaceID == INTERFACE_META_ID;
     }
 }

@@ -53,7 +53,7 @@ contract('PublicResolver', function (accounts) {
 
         it('supports known interfaces', async () => {
             assert.equal(await resolver.supportsInterface("0x3b3b57de"), true);
-            assert.equal(await resolver.supportsInterface("0xd8389dc5"), true);
+            assert.equal(await resolver.supportsInterface("0x4cb7724c"), true);
             assert.equal(await resolver.supportsInterface("0x691f3431"), true);
             assert.equal(await resolver.supportsInterface("0x2203ab56"), true);
             assert.equal(await resolver.supportsInterface("0xc8690233"), true);
@@ -128,59 +128,6 @@ contract('PublicResolver', function (accounts) {
 
         it('returns zero when fetching nonexistent addresses', async () => {
             assert.equal(await resolver.addr(node), '0x0000000000000000000000000000000000000000');
-        });
-    });
-
-    describe('content', async () => {
-
-        it('permits setting content by owner', async () => {
-            await resolver.setContent(node, 'hash1', {from: accounts[0]});
-            assert.equal(web3.toUtf8(await resolver.content(node)), 'hash1');
-        });
-
-        it('can overwrite previously set content', async () => {
-            await resolver.setContent(node, 'hash1', {from: accounts[0]});
-            assert.equal(web3.toUtf8(await resolver.content(node)), 'hash1');
-
-            await resolver.setContent(node, 'hash2', {from: accounts[0]});
-            assert.equal(web3.toUtf8(await resolver.content(node)), 'hash2');
-        });
-
-        it('can overwrite to same content', async () => {
-            await resolver.setContent(node, 'hash1', {from: accounts[0]});
-            assert.equal(web3.toUtf8(await resolver.content(node)), 'hash1');
-
-            await resolver.setContent(node, 'hash1', {from: accounts[0]});
-            assert.equal(web3.toUtf8(await resolver.content(node)), 'hash1');
-        });
-
-        it('forbids setting content by non-owners', async () => {
-            try {
-                await resolver.setContent(node, 'hash1', {from: accounts[1]});
-            } catch (error) {
-                return utils.ensureException(error);
-            }
-
-            assert.fail('setting did not fail');
-        });
-
-        it('forbids writing same content by non-owners', async () => {
-            await resolver.setContent(node, 'hash1', {from: accounts[0]});
-
-            try {
-                await resolver.setContent(node, 'hash1', {from: accounts[1]});
-            } catch (error) {
-                return utils.ensureException(error);
-            }
-
-            assert.fail('setting did not fail');
-        });
-
-        it('returns empty when fetching nonexistent content', async () => {
-            assert.equal(
-                await resolver.content(node),
-                '0x0000000000000000000000000000000000000000000000000000000000000000'
-            );
         });
     });
 
@@ -386,32 +333,32 @@ contract('PublicResolver', function (accounts) {
         });
     });
 
-    describe('multihash', async () => {
+    describe('multiaddr', async () => {
 
-        it('permits setting multihash by owner', async () => {
-            await resolver.setMultihash(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[0]});
-            assert.equal(await resolver.multihash(node), '0x0000000000000000000000000000000000000000000000000000000000000001');
+        it('permits setting multiaddr by owner', async () => {
+            await resolver.setMultiaddr(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[0]});
+            assert.equal(await resolver.multiaddr(node), '0x0000000000000000000000000000000000000000000000000000000000000001');
         });
 
-        it('can overwrite previously set multihash', async () => {
-            await resolver.setMultihash(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[0]});
-            assert.equal(await resolver.multihash(node), '0x0000000000000000000000000000000000000000000000000000000000000001');
+        it('can overwrite previously set multiaddr', async () => {
+            await resolver.setMultiaddr(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[0]});
+            assert.equal(await resolver.multiaddr(node), '0x0000000000000000000000000000000000000000000000000000000000000001');
 
-            await resolver.setMultihash(node, '0x0000000000000000000000000000000000000000000000000000000000000002', {from: accounts[0]});
-            assert.equal(await resolver.multihash(node), '0x0000000000000000000000000000000000000000000000000000000000000002');
+            await resolver.setMultiaddr(node, '0x0000000000000000000000000000000000000000000000000000000000000002', {from: accounts[0]});
+            assert.equal(await resolver.multiaddr(node), '0x0000000000000000000000000000000000000000000000000000000000000002');
         });
 
-        it('can overwrite to same multihash', async () => {
-            await resolver.setMultihash(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[0]});
-            assert.equal(await resolver.multihash(node), '0x0000000000000000000000000000000000000000000000000000000000000001');
+        it('can overwrite to same multiaddr', async () => {
+            await resolver.setMultiaddr(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[0]});
+            assert.equal(await resolver.multiaddr(node), '0x0000000000000000000000000000000000000000000000000000000000000001');
 
-            await resolver.setMultihash(node, '0x0000000000000000000000000000000000000000000000000000000000000002', {from: accounts[0]});
-            assert.equal(await resolver.multihash(node), '0x0000000000000000000000000000000000000000000000000000000000000002');
+            await resolver.setMultiaddr(node, '0x0000000000000000000000000000000000000000000000000000000000000002', {from: accounts[0]});
+            assert.equal(await resolver.multiaddr(node), '0x0000000000000000000000000000000000000000000000000000000000000002');
         });
 
-        it('forbids setting multihash by non-owners', async () => {
+        it('forbids setting multiaddr by non-owners', async () => {
             try {
-                await resolver.setMultihash(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[1]});
+                await resolver.setMultiaddr(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[1]});
             } catch (error) {
                 return utils.ensureException(error);
             }
@@ -419,11 +366,11 @@ contract('PublicResolver', function (accounts) {
             assert.fail('setting did not fail');
         });
 
-        it('forbids writing same multihash by non-owners', async () => {
-            await resolver.setMultihash(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[0]});
+        it('forbids writing same multiaddr by non-owners', async () => {
+            await resolver.setMultiaddr(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[0]});
 
             try {
-                await resolver.setMultihash(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[1]});
+                await resolver.setMultiaddr(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[1]});
             } catch (error) {
                 return utils.ensureException(error);
             }
@@ -431,9 +378,9 @@ contract('PublicResolver', function (accounts) {
             assert.fail('setting did not fail');
         });
 
-        it('returns empty when fetching nonexistent multihash', async () => {
+        it('returns empty when fetching nonexistent multiaddr', async () => {
             assert.equal(
-                await resolver.multihash(node),
+                await resolver.multiaddr(node),
                 '0x'
             );
         });
