@@ -127,17 +127,6 @@ contract PublicResolver {
     }
 
     /**
-     * Sets the multiaddr associated with an ENS node.
-     * May only be called by the owner of that node in the ENS registry.
-     * @param node The node to update.
-     * @param addr The multiaddr to set
-     */
-    function setMultiaddr(bytes32 node, bytes addr) public onlyOwner(node) {
-        records[node].multiaddr = addr;
-        emit MultiaddrChanged(node, addr);
-    }
-
-    /**
      * Returns the text data associated with an ENS node and key.
      * @param node The ENS node to query.
      * @param key The text data key to query.
