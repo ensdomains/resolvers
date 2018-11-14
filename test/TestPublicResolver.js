@@ -58,6 +58,7 @@ contract('PublicResolver', function (accounts) {
             assert.equal(await resolver.supportsInterface("0x2203ab56"), true);
             assert.equal(await resolver.supportsInterface("0xc8690233"), true);
             assert.equal(await resolver.supportsInterface("0x59d1d43c"), true);
+            assert.equal(await resolver.supportsInterface("0xbc1c58d1"), true);
         });
 
         it('does not support a random interface', async () => {
@@ -386,32 +387,32 @@ contract('PublicResolver', function (accounts) {
         });
     });
 
-    describe('multihash', async () => {
+    describe('contenthash', async () => {
 
-        it('permits setting multihash by owner', async () => {
-            await resolver.setMultihash(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[0]});
-            assert.equal(await resolver.multihash(node), '0x0000000000000000000000000000000000000000000000000000000000000001');
+        it('permits setting contenthash by owner', async () => {
+            await resolver.setContenthash(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[0]});
+            assert.equal(await resolver.contenthash(node), '0x0000000000000000000000000000000000000000000000000000000000000001');
         });
 
-        it('can overwrite previously set multihash', async () => {
-            await resolver.setMultihash(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[0]});
-            assert.equal(await resolver.multihash(node), '0x0000000000000000000000000000000000000000000000000000000000000001');
+        it('can overwrite previously set contenthash', async () => {
+            await resolver.setContenthash(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[0]});
+            assert.equal(await resolver.contenthash(node), '0x0000000000000000000000000000000000000000000000000000000000000001');
 
-            await resolver.setMultihash(node, '0x0000000000000000000000000000000000000000000000000000000000000002', {from: accounts[0]});
-            assert.equal(await resolver.multihash(node), '0x0000000000000000000000000000000000000000000000000000000000000002');
+            await resolver.setContenthash(node, '0x0000000000000000000000000000000000000000000000000000000000000002', {from: accounts[0]});
+            assert.equal(await resolver.contenthash(node), '0x0000000000000000000000000000000000000000000000000000000000000002');
         });
 
-        it('can overwrite to same multihash', async () => {
-            await resolver.setMultihash(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[0]});
-            assert.equal(await resolver.multihash(node), '0x0000000000000000000000000000000000000000000000000000000000000001');
+        it('can overwrite to same contenthash', async () => {
+            await resolver.setContenthash(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[0]});
+            assert.equal(await resolver.contenthash(node), '0x0000000000000000000000000000000000000000000000000000000000000001');
 
-            await resolver.setMultihash(node, '0x0000000000000000000000000000000000000000000000000000000000000002', {from: accounts[0]});
-            assert.equal(await resolver.multihash(node), '0x0000000000000000000000000000000000000000000000000000000000000002');
+            await resolver.setContenthash(node, '0x0000000000000000000000000000000000000000000000000000000000000002', {from: accounts[0]});
+            assert.equal(await resolver.contenthash(node), '0x0000000000000000000000000000000000000000000000000000000000000002');
         });
 
-        it('forbids setting multihash by non-owners', async () => {
+        it('forbids setting contenthash by non-owners', async () => {
             try {
-                await resolver.setMultihash(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[1]});
+                await resolver.setContenthash(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[1]});
             } catch (error) {
                 return utils.ensureException(error);
             }
@@ -419,11 +420,11 @@ contract('PublicResolver', function (accounts) {
             assert.fail('setting did not fail');
         });
 
-        it('forbids writing same multihash by non-owners', async () => {
-            await resolver.setMultihash(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[0]});
+        it('forbids writing same contenthash by non-owners', async () => {
+            await resolver.setContenthash(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[0]});
 
             try {
-                await resolver.setMultihash(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[1]});
+                await resolver.setContenthash(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[1]});
             } catch (error) {
                 return utils.ensureException(error);
             }
@@ -431,9 +432,9 @@ contract('PublicResolver', function (accounts) {
             assert.fail('setting did not fail');
         });
 
-        it('returns empty when fetching nonexistent multihash', async () => {
+        it('returns empty when fetching nonexistent contenthash', async () => {
             assert.equal(
-                await resolver.multihash(node),
+                await resolver.contenthash(node),
                 '0x'
             );
         });

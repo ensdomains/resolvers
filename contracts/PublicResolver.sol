@@ -15,7 +15,7 @@ contract PublicResolver {
     bytes4 constant ABI_INTERFACE_ID = 0x2203ab56;
     bytes4 constant PUBKEY_INTERFACE_ID = 0xc8690233;
     bytes4 constant TEXT_INTERFACE_ID = 0x59d1d43c;
-    bytes4 constant MULTIHASH_INTERFACE_ID = 0xe89401a1;
+    bytes4 constant CONTENTHASH_INTERFACE_ID = 0xbc1c58d1;
 
     event AddrChanged(bytes32 indexed node, address a);
     event ContentChanged(bytes32 indexed node, bytes32 hash);
@@ -23,7 +23,7 @@ contract PublicResolver {
     event ABIChanged(bytes32 indexed node, uint256 indexed contentType);
     event PubkeyChanged(bytes32 indexed node, bytes32 x, bytes32 y);
     event TextChanged(bytes32 indexed node, string indexedKey, string key);
-    event MultihashChanged(bytes32 indexed node, bytes hash);
+    event ContenthashChanged(bytes32 indexed node, bytes hash);
 
     struct PublicKey {
         bytes32 x;
@@ -37,7 +37,7 @@ contract PublicResolver {
         PublicKey pubkey;
         mapping(string=>string) text;
         mapping(uint256=>bytes) abis;
-        bytes multihash;
+        bytes contenthash;
     }
 
     ENS ens;
@@ -72,7 +72,7 @@ contract PublicResolver {
      * Sets the content hash associated with an ENS node.
      * May only be called by the owner of that node in the ENS registry.
      * Note that this resource type is not standardized, and will likely change
-     * in future to a resource type based on multihash.
+     * in future to a resource type based on contenthash.
      * @param node The node to update.
      * @param hash The content hash to set
      */
@@ -82,14 +82,14 @@ contract PublicResolver {
     }
 
     /**
-     * Sets the multihash associated with an ENS node.
+     * Sets the contenthash associated with an ENS node.
      * May only be called by the owner of that node in the ENS registry.
      * @param node The node to update.
-     * @param hash The multihash to set
+     * @param hash The contenthash to set
      */
-    function setMultihash(bytes32 node, bytes hash) public onlyOwner(node) {
-        records[node].multihash = hash;
-        emit MultihashChanged(node, hash);
+    function setContenthash(bytes32 node, bytes hash) public onlyOwner(node) {
+        records[node].contenthash = hash;
+        emit ContenthashChanged(node, hash);
     }
 
     /**
@@ -194,7 +194,7 @@ contract PublicResolver {
     /**
      * Returns the content hash associated with an ENS node.
      * Note that this resource type is not standardized, and will likely change
-     * in future to a resource type based on multihash.
+     * in future to a resource type based on contenthash.
      * @param node The ENS node to query.
      * @return The associated content hash.
      */
@@ -203,12 +203,12 @@ contract PublicResolver {
     }
 
     /**
-     * Returns the multihash associated with an ENS node.
+     * Returns the contenthash associated with an ENS node.
      * @param node The ENS node to query.
-     * @return The associated multihash.
+     * @return The associated contenthash.
      */
-    function multihash(bytes32 node) public view returns (bytes) {
-        return records[node].multihash;
+    function contenthash(bytes32 node) public view returns (bytes) {
+        return records[node].contenthash;
     }
 
     /**
@@ -232,7 +232,7 @@ contract PublicResolver {
         interfaceID == ABI_INTERFACE_ID ||
         interfaceID == PUBKEY_INTERFACE_ID ||
         interfaceID == TEXT_INTERFACE_ID ||
-        interfaceID == MULTIHASH_INTERFACE_ID ||
+        interfaceID == CONTENTHASH_INTERFACE_ID ||
         interfaceID == INTERFACE_META_ID;
     }
 }
