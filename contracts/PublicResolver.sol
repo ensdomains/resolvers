@@ -194,15 +194,6 @@ contract PublicResolver {
     }
 
     /**
-     * Returns the multiaddr associated with an ENS node.
-     * @param node The ENS node to query.
-     * @return The associated multiaddr.
-     */
-    function multiaddr(bytes32 node) public view returns (bytes) {
-        return records[node].multiaddr;
-    }
-
-    /**
      * Returns true if the resolver implements the interface specified by the provided hash.
      * @param interfaceID The ID of the interface to check for.
      * @return True if the contract implements the requested interface.
