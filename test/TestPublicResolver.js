@@ -53,7 +53,7 @@ contract('PublicResolver', function (accounts) {
 
         it('supports known interfaces', async () => {
             assert.equal(await resolver.supportsInterface("0x3b3b57de"), true);
-            assert.equal(await resolver.supportsInterface("0xd8389dc5"), true);
+            assert.equal(await resolver.supportsInterface("0x4cb7724c"), true);
             assert.equal(await resolver.supportsInterface("0x691f3431"), true);
             assert.equal(await resolver.supportsInterface("0x2203ab56"), true);
             assert.equal(await resolver.supportsInterface("0xc8690233"), true);
@@ -129,59 +129,6 @@ contract('PublicResolver', function (accounts) {
 
         it('returns zero when fetching nonexistent addresses', async () => {
             assert.equal(await resolver.addr(node), '0x0000000000000000000000000000000000000000');
-        });
-    });
-
-    describe('content', async () => {
-
-        it('permits setting content by owner', async () => {
-            await resolver.setContent(node, 'hash1', {from: accounts[0]});
-            assert.equal(web3.toUtf8(await resolver.content(node)), 'hash1');
-        });
-
-        it('can overwrite previously set content', async () => {
-            await resolver.setContent(node, 'hash1', {from: accounts[0]});
-            assert.equal(web3.toUtf8(await resolver.content(node)), 'hash1');
-
-            await resolver.setContent(node, 'hash2', {from: accounts[0]});
-            assert.equal(web3.toUtf8(await resolver.content(node)), 'hash2');
-        });
-
-        it('can overwrite to same content', async () => {
-            await resolver.setContent(node, 'hash1', {from: accounts[0]});
-            assert.equal(web3.toUtf8(await resolver.content(node)), 'hash1');
-
-            await resolver.setContent(node, 'hash1', {from: accounts[0]});
-            assert.equal(web3.toUtf8(await resolver.content(node)), 'hash1');
-        });
-
-        it('forbids setting content by non-owners', async () => {
-            try {
-                await resolver.setContent(node, 'hash1', {from: accounts[1]});
-            } catch (error) {
-                return utils.ensureException(error);
-            }
-
-            assert.fail('setting did not fail');
-        });
-
-        it('forbids writing same content by non-owners', async () => {
-            await resolver.setContent(node, 'hash1', {from: accounts[0]});
-
-            try {
-                await resolver.setContent(node, 'hash1', {from: accounts[1]});
-            } catch (error) {
-                return utils.ensureException(error);
-            }
-
-            assert.fail('setting did not fail');
-        });
-
-        it('returns empty when fetching nonexistent content', async () => {
-            assert.equal(
-                await resolver.content(node),
-                '0x0000000000000000000000000000000000000000000000000000000000000000'
-            );
         });
     });
 
