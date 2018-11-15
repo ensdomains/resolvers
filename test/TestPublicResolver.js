@@ -53,11 +53,11 @@ contract('PublicResolver', function (accounts) {
 
         it('supports known interfaces', async () => {
             assert.equal(await resolver.supportsInterface("0x3b3b57de"), true);
-            assert.equal(await resolver.supportsInterface("0x4cb7724c"), true);
             assert.equal(await resolver.supportsInterface("0x691f3431"), true);
             assert.equal(await resolver.supportsInterface("0x2203ab56"), true);
             assert.equal(await resolver.supportsInterface("0xc8690233"), true);
             assert.equal(await resolver.supportsInterface("0x59d1d43c"), true);
+            assert.equal(await resolver.supportsInterface("0xbc1c58d1"), true);
         });
 
         it('does not support a random interface', async () => {
@@ -333,32 +333,32 @@ contract('PublicResolver', function (accounts) {
         });
     });
 
-    describe('multiaddr', async () => {
+    describe('contenthash', async () => {
 
-        it('permits setting multiaddr by owner', async () => {
-            await resolver.setMultiaddr(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[0]});
-            assert.equal(await resolver.multiaddr(node), '0x0000000000000000000000000000000000000000000000000000000000000001');
+        it('permits setting contenthash by owner', async () => {
+            await resolver.setContenthash(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[0]});
+            assert.equal(await resolver.contenthash(node), '0x0000000000000000000000000000000000000000000000000000000000000001');
         });
 
-        it('can overwrite previously set multiaddr', async () => {
-            await resolver.setMultiaddr(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[0]});
-            assert.equal(await resolver.multiaddr(node), '0x0000000000000000000000000000000000000000000000000000000000000001');
+        it('can overwrite previously set contenthash', async () => {
+            await resolver.setContenthash(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[0]});
+            assert.equal(await resolver.contenthash(node), '0x0000000000000000000000000000000000000000000000000000000000000001');
 
-            await resolver.setMultiaddr(node, '0x0000000000000000000000000000000000000000000000000000000000000002', {from: accounts[0]});
-            assert.equal(await resolver.multiaddr(node), '0x0000000000000000000000000000000000000000000000000000000000000002');
+            await resolver.setContenthash(node, '0x0000000000000000000000000000000000000000000000000000000000000002', {from: accounts[0]});
+            assert.equal(await resolver.contenthash(node), '0x0000000000000000000000000000000000000000000000000000000000000002');
         });
 
-        it('can overwrite to same multiaddr', async () => {
-            await resolver.setMultiaddr(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[0]});
-            assert.equal(await resolver.multiaddr(node), '0x0000000000000000000000000000000000000000000000000000000000000001');
+        it('can overwrite to same contenthash', async () => {
+            await resolver.setContenthash(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[0]});
+            assert.equal(await resolver.contenthash(node), '0x0000000000000000000000000000000000000000000000000000000000000001');
 
-            await resolver.setMultiaddr(node, '0x0000000000000000000000000000000000000000000000000000000000000002', {from: accounts[0]});
-            assert.equal(await resolver.multiaddr(node), '0x0000000000000000000000000000000000000000000000000000000000000002');
+            await resolver.setContenthash(node, '0x0000000000000000000000000000000000000000000000000000000000000002', {from: accounts[0]});
+            assert.equal(await resolver.contenthash(node), '0x0000000000000000000000000000000000000000000000000000000000000002');
         });
 
-        it('forbids setting multiaddr by non-owners', async () => {
+        it('forbids setting contenthash by non-owners', async () => {
             try {
-                await resolver.setMultiaddr(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[1]});
+                await resolver.setContenthash(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[1]});
             } catch (error) {
                 return utils.ensureException(error);
             }
@@ -366,11 +366,11 @@ contract('PublicResolver', function (accounts) {
             assert.fail('setting did not fail');
         });
 
-        it('forbids writing same multiaddr by non-owners', async () => {
-            await resolver.setMultiaddr(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[0]});
+        it('forbids writing same contenthash by non-owners', async () => {
+            await resolver.setContenthash(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[0]});
 
             try {
-                await resolver.setMultiaddr(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[1]});
+                await resolver.setContenthash(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[1]});
             } catch (error) {
                 return utils.ensureException(error);
             }
@@ -378,9 +378,9 @@ contract('PublicResolver', function (accounts) {
             assert.fail('setting did not fail');
         });
 
-        it('returns empty when fetching nonexistent multiaddr', async () => {
+        it('returns empty when fetching nonexistent contenthash', async () => {
             assert.equal(
-                await resolver.multiaddr(node),
+                await resolver.contenthash(node),
                 '0x'
             );
         });
