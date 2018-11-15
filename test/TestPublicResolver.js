@@ -53,7 +53,6 @@ contract('PublicResolver', function (accounts) {
 
         it('supports known interfaces', async () => {
             assert.equal(await resolver.supportsInterface("0x3b3b57de"), true);
-            assert.equal(await resolver.supportsInterface("0x4cb7724c"), true);
             assert.equal(await resolver.supportsInterface("0x691f3431"), true);
             assert.equal(await resolver.supportsInterface("0x2203ab56"), true);
             assert.equal(await resolver.supportsInterface("0xc8690233"), true);
