@@ -1,5 +1,7 @@
 pragma solidity ^0.5.0;
 
+import "@ensdomains/ens/contracts/ENS.sol";
+
 /**
  * @dev Provides a default implementation of a resolver for reverse records,
  * which permits only the owner to update it.
