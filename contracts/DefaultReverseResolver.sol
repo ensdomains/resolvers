@@ -1,6 +1,7 @@
 pragma solidity >=0.4.25;
 
 import "@ensdomains/ens/contracts/ENS.sol";
+import "@ensdomains/ens/contracts/ReverseRegistrar.sol";
 
 /**
  * @dev Provides a default implementation of a resolver for reverse records,
