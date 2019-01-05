@@ -4,6 +4,8 @@ const PublicResolver = artifacts.require('PublicResolver.sol');
 const utils = require('./helpers/Utils.js');
 const namehash = require('eth-ens-namehash');
 
+// @TODO UPDATE web3.sha3 to web3utils
+
 contract('PublicResolver', function (accounts) {
 
     let node;
