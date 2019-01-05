@@ -6,7 +6,7 @@
   "devDependencies": {
     "eth-gas-reporter": "^0.1.2",
     "solium": "^1.0.4",
-    "truffle": "^4.1.12",
+    "truffle": "^5.0.0",
     "@ensdomains/ens": "^0.2.2",
     "eth-ens-namehash": "^2.0.8"
   },
