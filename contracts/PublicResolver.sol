@@ -60,7 +60,7 @@ contract PublicResolver {
      * @param node The node to update.
      * @param addr The address to set.
      */
-    function setAddr(bytes32 node, address addr) public onlyOwner(node) {
+    function setAddr(bytes32 node, address addr) external onlyOwner(node) {
         records[node].addr = addr;
         emit AddrChanged(node, addr);
     }
@@ -71,7 +71,7 @@ contract PublicResolver {
      * @param node The node to update.
      * @param hash The contenthash to set
      */
-    function setContenthash(bytes32 node, bytes hash) public onlyOwner(node) {
+    function setContenthash(bytes32 node, bytes calldata hash) external onlyOwner(node) {
         records[node].contenthash = hash;
         emit ContenthashChanged(node, hash);
     }
@@ -82,7 +82,7 @@ contract PublicResolver {
      * @param node The node to update.
      * @param name The name to set.
      */
-    function setName(bytes32 node, string name) public onlyOwner(node) {
+    function setName(bytes32 node, string calldata name) external onlyOwner(node) {
         records[node].name = name;
         emit NameChanged(node, name);
     }
@@ -95,7 +95,7 @@ contract PublicResolver {
      * @param contentType The content type of the ABI
      * @param data The ABI data.
      */
-    function setABI(bytes32 node, uint256 contentType, bytes data) public onlyOwner(node) {
+    function setABI(bytes32 node, uint256 contentType, bytes calldata data) external onlyOwner(node) {
         // Content types must be powers of 2
         require(((contentType - 1) & contentType) == 0);
 
@@ -109,7 +109,7 @@ contract PublicResolver {
      * @param x the X coordinate of the curve point for the public key.
      * @param y the Y coordinate of the curve point for the public key.
      */
-    function setPubkey(bytes32 node, bytes32 x, bytes32 y) public onlyOwner(node) {
+    function setPubkey(bytes32 node, bytes32 x, bytes32 y) external onlyOwner(node) {
         records[node].pubkey = PublicKey(x, y);
         emit PubkeyChanged(node, x, y);
     }
@@ -121,7 +121,7 @@ contract PublicResolver {
      * @param key The key to set.
      * @param value The text data value to set.
      */
-    function setText(bytes32 node, string key, string value) public onlyOwner(node) {
+    function setText(bytes32 node, string calldata key, string calldata value) external onlyOwner(node) {
         records[node].text[key] = value;
         emit TextChanged(node, key, key);
     }
@@ -132,7 +132,7 @@ contract PublicResolver {
      * @param key The text data key to query.
      * @return The associated text data.
      */
-    function text(bytes32 node, string key) public view returns (string) {
+    function text(bytes32 node, string calldata key) external view returns (string memory) {
         return records[node].text[key];
     }
 
@@ -142,7 +142,7 @@ contract PublicResolver {
      * @param node The ENS node to query
      * @return x, y the X and Y coordinates of the curve point for the public key.
      */
-    function pubkey(bytes32 node) public view returns (bytes32 x, bytes32 y) {
+    function pubkey(bytes32 node) external view returns (bytes32 x, bytes32 y) {
         return (records[node].pubkey.x, records[node].pubkey.y);
     }
 
@@ -154,7 +154,7 @@ contract PublicResolver {
      * @return contentType The content type of the return value
      * @return data The ABI data
      */
-    function ABI(bytes32 node, uint256 contentTypes) public view returns (uint256 contentType, bytes data) {
+    function ABI(bytes32 node, uint256 contentTypes) external view returns (uint256 contentType, bytes memory data) {
         Record storage record = records[node];
         for (contentType = 1; contentType <= contentTypes; contentType <<= 1) {
             if ((contentType & contentTypes) != 0 && record.abis[contentType].length > 0) {
@@ -171,7 +171,7 @@ contract PublicResolver {
      * @param node The ENS node to query.
      * @return The associated name.
      */
-    function name(bytes32 node) public view returns (string) {
+    function name(bytes32 node) external view returns (string memory) {
         return records[node].name;
     }
 
@@ -180,7 +180,7 @@ contract PublicResolver {
      * @param node The ENS node to query.
      * @return The associated address.
      */
-    function addr(bytes32 node) public view returns (address) {
+    function addr(bytes32 node) external view returns (address) {
         return records[node].addr;
     }
 
@@ -189,7 +189,7 @@ contract PublicResolver {
      * @param node The ENS node to query.
      * @return The associated contenthash.
      */
-    function contenthash(bytes32 node) public view returns (bytes) {
+    function contenthash(bytes32 node) external view returns (bytes memory) {
         return records[node].contenthash;
     }
 
@@ -198,7 +198,7 @@ contract PublicResolver {
      * @param interfaceID The ID of the interface to check for.
      * @return True if the contract implements the requested interface.
      */
-    function supportsInterface(bytes4 interfaceID) public pure returns (bool) {
+    function supportsInterface(bytes4 interfaceID) external pure returns (bool) {
         return interfaceID == ADDR_INTERFACE_ID ||
         interfaceID == NAME_INTERFACE_ID ||
         interfaceID == ABI_INTERFACE_ID ||
