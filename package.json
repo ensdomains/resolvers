@@ -12,7 +12,6 @@
     "web3-utils": "^1.0.0-beta.31"
   },
   "scripts": {
-    "pretest": "truffle compile",
     "test": "truffle test",
     "watch": "npm-watch",
     "lint": "solium --dir ./contracts",
