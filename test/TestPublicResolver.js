@@ -5,8 +5,6 @@ const utils = require('./helpers/Utils.js');
 const namehash = require('eth-ens-namehash');
 const sha3 = require('web3-utils').sha3;
 
-// @TODO UPDATE sha3 to web3utils
-
 contract('PublicResolver', function (accounts) {
 
     let node;
