@@ -18,7 +18,7 @@ contract DefaultReverseResolver {
      * @dev Only permits calls by the reverse registrar.
      * @param node The node permission is required for.
      */
-    modifier owner_only(bytes32 node) {
+    modifier onlyOwner(bytes32 node) {
         require(msg.sender == ens.owner(node));
         _;
     }
@@ -42,7 +42,7 @@ contract DefaultReverseResolver {
      * @param node The node to update.
      * @param _name The name to set.
      */
-    function setName(bytes32 node, string memory _name) public owner_only(node) {
+    function setName(bytes32 node, string memory _name) public onlyOwner(node) {
         name[node] = _name;
     }
 }
