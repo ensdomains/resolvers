@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity >=0.4.25;
 
 import "./PublicResolver.sol";
 
@@ -12,7 +12,7 @@ contract CustodialPublicResolver is PublicResolver {
      * @param addr The address to set.
      * @param signature Signature signed by the node owner.
      */
-    function setAddrFor(bytes32 node, address addr, bytes signature) public {
+    function setAddrFor(bytes32 node, address addr, bytes calldata signature) external {
         validateSignature(node, abi.encodePacked(node, addr), signature);
         records[node].addr = addr;
         emit AddrChanged(node, addr);
@@ -24,7 +24,7 @@ contract CustodialPublicResolver is PublicResolver {
      * @param hash The contenthash to set.
      * @param signature Signature signed by the node owner.
      */
-    function setContenthashFor(bytes32 node, bytes hash, bytes signature) public {
+    function setContenthashFor(bytes32 node, bytes calldata hash, bytes calldata signature) external {
         validateSignature(node, abi.encodePacked(node, hash), signature);
         records[node].contenthash = hash;
         emit ContenthashChanged(node, hash);
@@ -36,7 +36,7 @@ contract CustodialPublicResolver is PublicResolver {
      * @param name The name to set.
      * @param signature Signature signed by the node owner.
      */
-    function setNameFor(bytes32 node, string name, bytes signature) public {
+    function setNameFor(bytes32 node, string calldata name, bytes calldata signature) external {
         validateSignature(node, abi.encodePacked(node, name), signature);
         records[node].name = name;
         emit NameChanged(node, name);
@@ -51,7 +51,7 @@ contract CustodialPublicResolver is PublicResolver {
      * @param data The ABI data.
      * @param signature Signature signed by the node owner.
      */
-    function setABIFor(bytes32 node, uint256 contentType, bytes data, bytes signature) public {
+    function setABIFor(bytes32 node, uint256 contentType, bytes calldata data, bytes calldata signature) external {
         validateSignature(node, abi.encodePacked(node, contentType, data), signature);
 
         require(((contentType - 1) & contentType) == 0);
@@ -67,7 +67,7 @@ contract CustodialPublicResolver is PublicResolver {
      * @param y the Y coordinate of the curve point for the public key.
      * @param signature Signature signed by the node owner.
      */
-    function setPubkeyFor(bytes32 node, bytes32 x, bytes32 y, bytes signature) public {
+    function setPubkeyFor(bytes32 node, bytes32 x, bytes32 y, bytes calldata signature) external {
         validateSignature(node, abi.encodePacked(node, x, y), signature);
         records[node].pubkey = PublicKey(x, y);
         emit PubkeyChanged(node, x, y);
@@ -80,13 +80,13 @@ contract CustodialPublicResolver is PublicResolver {
      * @param value The text data value to set.
      * @param signature Signature signed by the node owner.
      */
-    function setTextFor(bytes32 node, string key, string value, bytes signature) public {
+    function setTextFor(bytes32 node, string calldata key, string calldata value, bytes calldata signature) external {
         validateSignature(node, abi.encodePacked(node, key, value), signature);
         records[node].text[key] = value;
         emit TextChanged(node, key, key);
     }
 
-    function validateSignature(bytes32 node, bytes message, bytes signature) private {
+    function validateSignature(bytes32 node, bytes memory message, bytes memory signature) private {
         address owner = ens.owner(node);
         uint256 nonce = nonces[owner];
 
@@ -95,7 +95,7 @@ contract CustodialPublicResolver is PublicResolver {
         nonces[owner] += 1;
     }
 
-    function recover(bytes32 hash, bytes signature) private returns (address) {
+    function recover(bytes32 hash, bytes memory signature) private pure returns (address) {
         uint8 v = uint8(signature[0]);
         bytes32 r;
         bytes32 s;
@@ -105,6 +105,6 @@ contract CustodialPublicResolver is PublicResolver {
             s := mload(add(signature, 65))
         }
 
-        return ecrecover(keccak256("\x19Ethereum Signed Message:\n32", hash), v, r, s);
+        return ecrecover(keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", hash)), v, r, s);
     }
 }
