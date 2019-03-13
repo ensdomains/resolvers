@@ -14,7 +14,7 @@ contract CustodialPublicResolver is PublicResolver {
      */
     function setAddrFor(bytes32 node, address addr, bytes calldata signature) external {
         validateSignature(node, abi.encodePacked(node, addr), signature);
-        records[node].addr = addr;
+        addresses[node] = addr;
         emit AddrChanged(node, addr);
     }
 
@@ -26,7 +26,7 @@ contract CustodialPublicResolver is PublicResolver {
      */
     function setContenthashFor(bytes32 node, bytes calldata hash, bytes calldata signature) external {
         validateSignature(node, abi.encodePacked(node, hash), signature);
-        records[node].contenthash = hash;
+        hashes[node] = hash;
         emit ContenthashChanged(node, hash);
     }
 
@@ -38,7 +38,7 @@ contract CustodialPublicResolver is PublicResolver {
      */
     function setNameFor(bytes32 node, string calldata name, bytes calldata signature) external {
         validateSignature(node, abi.encodePacked(node, name), signature);
-        records[node].name = name;
+        names[node] = name;
         emit NameChanged(node, name);
     }
 
@@ -56,7 +56,7 @@ contract CustodialPublicResolver is PublicResolver {
 
         require(((contentType - 1) & contentType) == 0);
 
-        records[node].abis[contentType] = data;
+        abis[node][contentType] = data;
         emit ABIChanged(node, contentType);
     }
 
@@ -69,7 +69,7 @@ contract CustodialPublicResolver is PublicResolver {
      */
     function setPubkeyFor(bytes32 node, bytes32 x, bytes32 y, bytes calldata signature) external {
         validateSignature(node, abi.encodePacked(node, x, y), signature);
-        records[node].pubkey = PublicKey(x, y);
+        pubkeys[node] = PublicKey(x, y);
         emit PubkeyChanged(node, x, y);
     }
 
@@ -82,7 +82,7 @@ contract CustodialPublicResolver is PublicResolver {
      */
     function setTextFor(bytes32 node, string calldata key, string calldata value, bytes calldata signature) external {
         validateSignature(node, abi.encodePacked(node, key, value), signature);
-        records[node].text[key] = value;
+        texts[node][key] = value;
         emit TextChanged(node, key, key);
     }
 
