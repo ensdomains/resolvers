@@ -15,6 +15,7 @@ contract PublicResolver {
     bytes4 constant PUBKEY_INTERFACE_ID = 0xc8690233;
     bytes4 constant TEXT_INTERFACE_ID = 0x59d1d43c;
     bytes4 constant CONTENTHASH_INTERFACE_ID = 0xbc1c58d1;
+    bytes4 constant INTERFACE_INTERFACE_ID = bytes4(keccak256("interfaceImplementer(bytes32,bytes4)"));
 
     event AddrChanged(bytes32 indexed node, address a);
     event NameChanged(bytes32 indexed node, string name);
@@ -22,6 +23,7 @@ contract PublicResolver {
     event PubkeyChanged(bytes32 indexed node, bytes32 x, bytes32 y);
     event TextChanged(bytes32 indexed node, string indexedKey, string key);
     event ContenthashChanged(bytes32 indexed node, bytes hash);
+    event InterfaceChanged(bytes32 indexed node, bytes4 indexed interfaceID, address implementer);
 
     struct PublicKey {
         bytes32 x;
@@ -35,6 +37,7 @@ contract PublicResolver {
         mapping(string=>string) text;
         mapping(uint256=>bytes) abis;
         bytes contenthash;
+        mapping(bytes4=>address) interfaces;
     }
 
     ENS ens;
@@ -127,6 +130,18 @@ contract PublicResolver {
     }
 
     /**
+     * Sets an interface associated with a name.
+     * Setting the address to 0 restores the default behaviour of querying the contract at `addr()` for interface support.
+     * @param node The node to update.
+     * @param interfaceID The EIP 168 interface ID.
+     * @param implementer The address of a contract that implements this interface for this node.
+     */
+    function setInterface(bytes32 node, bytes4 interfaceID, address implementer) external onlyOwner(node) {
+        records[node].interfaces[interfaceID] = implementer;
+        emit InterfaceChanged(node, interfaceID, implementer);
+    }
+
+    /**
      * Returns the text data associated with an ENS node and key.
      * @param node The ENS node to query.
      * @param key The text data key to query.
@@ -182,7 +197,7 @@ contract PublicResolver {
      * @param node The ENS node to query.
      * @return The associated address.
      */
-    function addr(bytes32 node) external view returns (address) {
+    function addr(bytes32 node) public view returns (address) {
         return records[node].addr;
     }
 
@@ -193,6 +208,42 @@ contract PublicResolver {
      */
     function contenthash(bytes32 node) external view returns (bytes memory) {
         return records[node].contenthash;
+    }
+
+    /**
+     * Returns the address of a contract that implements the specified interface for this name.
+     * If an implementer has not been set for this interfaceID and name, the resolver will query
+     * the contract at `addr()`. If `addr()` is set, a contract exists at that address, and that
+     * contract implements EIP168 and returns `true` for the specified interfaceID, its address
+     * will be returned.
+     * @param node The ENS node to query.
+     * @param interfaceID The EIP 168 interface ID to check for.
+     * @return The address that implements this interface, or 0 if the interface is unsupported.
+     */
+    function interfaceImplementer(bytes32 node, bytes4 interfaceID) external view returns (address) {
+        address implementer = records[node].interfaces[interfaceID];
+        if(implementer != address(0)) {
+            return implementer;
+        }
+
+        address a = addr(node);
+        if(a == address(0)) {
+            return address(0);
+        }
+
+        (bool success, bytes memory returnData) = a.staticcall(abi.encodeWithSignature("supportsInterface(bytes4)", INTERFACE_META_ID));
+        if(!success || returnData.length < 32 || returnData[31] == 0) {
+            // EIP 168 not supported by target
+            return address(0);
+        }
+
+        (success, returnData) = a.staticcall(abi.encodeWithSignature("supportsInterface(bytes4)", interfaceID));
+        if(!success || returnData.length < 32 || returnData[31] == 0) {
+            // Specified interface not supported by target
+            return address(0);
+        }
+
+        return a;
     }
 
     /**
@@ -207,6 +258,7 @@ contract PublicResolver {
         interfaceID == PUBKEY_INTERFACE_ID ||
         interfaceID == TEXT_INTERFACE_ID ||
         interfaceID == CONTENTHASH_INTERFACE_ID ||
+        interfaceID == INTERFACE_INTERFACE_ID ||
         interfaceID == INTERFACE_META_ID;
     }
 }
