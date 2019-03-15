@@ -419,4 +419,55 @@ contract('PublicResolver', function (accounts) {
         });
     });
 
+    describe('implementsInterface', async () => {
+        it('permits setting interface by owner', async () => {
+            await resolver.setInterface(node, "0x12345678", accounts[0], {from: accounts[0]});
+            assert.equal(await resolver.interfaceImplementer(node, "0x12345678"), accounts[0]);
+        });
+
+        it('can update previously set interface', async () => {
+            await resolver.setInterface(node, "0x12345678", resolver.address, {from: accounts[0]});
+            assert.equal(await resolver.interfaceImplementer(node, "0x12345678"), resolver.address);
+        });
+
+        it('forbids setting interface by non-owner', async () => {
+            try {
+                await resolver.setInterface(node, '0x12345678', accounts[1], {from: accounts[1]});
+            } catch (error) {
+                return utils.ensureException(error);
+            }
+
+            assert.fail('setting did not fail');
+        });
+
+        it('returns 0 when fetching unset interface', async () => {
+            assert.equal(await resolver.interfaceImplementer(namehash.hash("foo"), "0x12345678"), "0x0000000000000000000000000000000000000000");
+        });
+
+        it('falls back to calling implementsInterface on addr', async () => {
+            // Set addr to the resolver itself, since it has interface implementations.
+            await resolver.setAddr(node, resolver.address, {from: accounts[0]});
+            // Check the ID for `addr(bytes32)`
+            assert.equal(await resolver.interfaceImplementer(node, "0x3b3b57de"), resolver.address);
+        });
+
+        it('returns 0 on fallback when target contract does not implement interface', async () => {
+            // Check an imaginary interface ID we know it doesn't support.
+            assert.equal(await resolver.interfaceImplementer(node, "0x00000000"), "0x0000000000000000000000000000000000000000");
+        });
+
+        it('returns 0 on fallback when target contract does not support implementsInterface', async () => {
+            // Set addr to the ENS registry, which doesn't implement supportsInterface.
+            await resolver.setAddr(node, ens.address, {from: accounts[0]});
+            // Check the ID for `supportsInterface(bytes4)`
+            assert.equal(await resolver.interfaceImplementer(node, "0x01ffc9a7"), "0x0000000000000000000000000000000000000000");
+        });
+
+        it('returns 0 on fallback when target is not a contract', async () => {
+            // Set addr to an externally owned account.
+            await resolver.setAddr(node, accounts[0], {from: accounts[0]});
+            // Check the ID for `supportsInterface(bytes4)`
+            assert.equal(await resolver.interfaceImplementer(node, "0x01ffc9a7"), "0x0000000000000000000000000000000000000000");
+        });
+    });
 });
