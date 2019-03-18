@@ -470,4 +470,49 @@ contract('PublicResolver', function (accounts) {
             assert.equal(await resolver.interfaceImplementer(node, "0x01ffc9a7"), "0x0000000000000000000000000000000000000000");
         });
     });
+
+    describe('authorisations', async () => {
+        it('permits authorisations to be set', async () => {
+            await resolver.setAuthorisation(node, accounts[1], true, {from: accounts[0]});
+            assert.equal(await resolver.authorisations(node, accounts[0], accounts[1]), true);
+        });
+
+        it('permits authorised users to make changes', async () => {
+          assert.equal(await resolver.authorisations(node, await ens.owner(node), accounts[1]), true);
+            await resolver.setAddr(node, accounts[1], {from: accounts[1]});
+            assert.equal(await resolver.addr(node), accounts[1]);
+        });
+
+        it('permits authorisations to be cleared', async () => {
+            await resolver.setAuthorisation(node, accounts[1], false, {from: accounts[0]});
+            try {
+                await resolver.setAddr(node, accounts[0], {from: accounts[1]});
+            } catch (error) {
+                return utils.ensureException(error);
+            }
+
+            assert.fail('setting did not fail');
+        });
+
+        it('permits non-owners to set authorisations', async () => {
+            await resolver.setAuthorisation(node, accounts[2], true, {from: accounts[1]});
+
+            // The authorisation should have no effect, because accounts[1] is not the owner.
+            try {
+                await resolver.setAddr(node, accounts[0], {from: accounts[2]});
+            } catch (error) {
+                return utils.ensureException(error);
+            }
+
+            assert.fail('setting did not fail');
+        });
+
+        it('checks the authorisation for the current owner', async () => {
+            await ens.setOwner(node, accounts[1], {from: accounts[0]});
+
+            // Now the authorisation from the previous test should be effective
+            await resolver.setAddr(node, accounts[0], {from: accounts[2]});
+            assert.equal(await resolver.addr(node), accounts[0]);
+        });
+    });
 });
