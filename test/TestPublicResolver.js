@@ -478,7 +478,8 @@ contract('PublicResolver', function (accounts) {
         });
 
         it('permits authorised users to make changes', async () => {
-          assert.equal(await resolver.authorisations(node, await ens.owner(node), accounts[1]), true);
+            await resolver.setAuthorisation(node, accounts[1], true, {from: accounts[0]});
+            assert.equal(await resolver.authorisations(node, await ens.owner(node), accounts[1]), true);
             await resolver.setAddr(node, accounts[1], {from: accounts[1]});
             assert.equal(await resolver.addr(node), accounts[1]);
         });
@@ -508,9 +509,9 @@ contract('PublicResolver', function (accounts) {
         });
 
         it('checks the authorisation for the current owner', async () => {
+            await resolver.setAuthorisation(node, accounts[2], true, {from: accounts[1]});
             await ens.setOwner(node, accounts[1], {from: accounts[0]});
 
-            // Now the authorisation from the previous test should be effective
             await resolver.setAddr(node, accounts[0], {from: accounts[2]});
             assert.equal(await resolver.addr(node), accounts[0]);
         });
