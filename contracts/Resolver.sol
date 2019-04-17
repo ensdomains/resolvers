@@ -23,6 +23,7 @@ interface Resolver{
     function setABIFor(bytes32 node, uint256 contentType, bytes calldata data, bytes calldata signature) external;
     function setAddr(bytes32 node, address addr) external;
     function setAddrFor(bytes32 node, address addr, bytes calldata signature) external;
+    function setAuthorisation(bytes32 node, address target, bool isAuthorised) external;
     function setContenthash(bytes32 node, bytes calldata hash) external;
     function setContenthashFor(bytes32 node, bytes calldata hash, bytes calldata signature) external;
     function setDnsrr(bytes32 node, bytes calldata data) external;
