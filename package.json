@@ -1,6 +1,6 @@
 {
   "name": "@ensdomains/resolver",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "requires": true,
   "lockfileVersion": 1,
   "devDependencies": {
