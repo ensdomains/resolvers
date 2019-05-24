@@ -1,7 +1,7 @@
 pragma solidity ^0.5.0;
 
 import "../ResolverBase.sol";
-import "../util/RRUtils.sol";
+import "@ensdomains/dnssec-oracle/contracts/RRUtils.sol";
 
 contract DNSResolver is ResolverBase {
     using RRUtils for *;
@@ -20,16 +20,16 @@ contract DNSResolver is ResolverBase {
     // track of their entries to effectively delete an entire zone by bumping
     // the version number.
     // node => version
-    mapping(bytes32=>uint16) private versions;
+    mapping(bytes32=>uint256) private versions;
 
     // The records themselves.  Stored as binary RRSETs
-    // node => name => version => resource => data
-    mapping(bytes32=>mapping(uint16=>mapping(bytes32=>mapping(uint16=>bytes)))) private records;
+    // node => version => name => resource => data
+    mapping(bytes32=>mapping(uint256=>mapping(bytes32=>mapping(uint16=>bytes)))) private records;
 
     // Count of number of entries for a given name.  Required for DNS resolvers
     // when resolving wildcards.
-    // node => name => version => number of records
-    mapping(bytes32=>mapping(uint16=>mapping(bytes32=>uint16))) private nameEntriesCount;
+    // node => version => name => number of records
+    mapping(bytes32=>mapping(uint256=>mapping(bytes32=>uint16))) private nameEntriesCount;
 
     /**
      * Set one or more DNS records.  Records are supplied in wire-format.
@@ -66,7 +66,7 @@ contract DNSResolver is ResolverBase {
             } else {
                 bytes memory newName = iter.name();
                 if (resource != iter.dnstype || !name.equals(newName)) {
-                    setDNSRRSet(node, name, resource, data, offset, iter.offset - offset, value);
+                    setDNSRRSet(node, name, resource, data, offset, iter.offset - offset, value.length == 0);
                     resource = iter.dnstype;
                     offset = iter.offset;
                     name = newName;
@@ -76,7 +76,7 @@ contract DNSResolver is ResolverBase {
             }
         }
         if (name.length > 0) {
-            setDNSRRSet(node, name, resource, data, offset, data.length - offset, value);
+            setDNSRRSet(node, name, resource, data, offset, data.length - offset, value.length == 0);
         }
     }
 
@@ -120,12 +120,12 @@ contract DNSResolver is ResolverBase {
         bytes memory data,
         uint256 offset,
         uint256 size,
-        bytes memory value) private
+        bool deleteRecord) private
     {
-        uint16 version = versions[node];
+        uint256 version = versions[node];
         bytes32 nameHash = keccak256(name);
         bytes memory rrData = data.substring(offset, size);
-        if (value.length == 0) {
+        if (deleteRecord) {
             if (records[node][version][nameHash][resource].length != 0) {
                 nameEntriesCount[node][version][nameHash]--;
             }
