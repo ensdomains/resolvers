@@ -4,6 +4,8 @@
   "requires": true,
   "lockfileVersion": 1,
   "devDependencies": {
+    "@ensdomains/buffer": "^0.0.10",
+    "@ensdomains/dnssec-oracle": "^0.1.2",
     "@ensdomains/ens": "^0.2.2",
     "eth-ens-namehash": "^2.0.8",
     "eth-gas-reporter": "^0.1.2",
