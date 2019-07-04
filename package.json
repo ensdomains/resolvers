@@ -19,7 +19,7 @@
     "watch": "npm-watch",
     "lint": "solium --dir ./contracts",
     "prepublishOnly": "truffle compile && truffle networks --clean",
-      "pub": "npm run prepublishOnly && npm publish"
+    "pub": "npm run prepublishOnly && npm publish"
   },
   "dependencies": {}
 }
