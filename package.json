@@ -1,6 +1,6 @@
 {
   "name": "@ensdomains/resolver",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "requires": true,
   "lockfileVersion": 1,
   "devDependencies": {
@@ -18,7 +18,8 @@
     "test": "truffle test",
     "watch": "npm-watch",
     "lint": "solium --dir ./contracts",
-    "prepublishOnly": "truffle compile && truffle networks --clean"
+    "prepublishOnly": "truffle compile && truffle networks --clean",
+      "pub": "npm run prepublishOnly && npm publish"
   },
   "dependencies": {}
 }
