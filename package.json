@@ -1,7 +1,8 @@
 {
   "name": "@ensdomains/resolver",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "requires": true,
+  "main": "index.js",
   "lockfileVersion": 1,
   "devDependencies": {
     "@ensdomains/buffer": "^0.0.10",
