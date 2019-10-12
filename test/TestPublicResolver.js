@@ -70,30 +70,37 @@ contract('PublicResolver', function (accounts) {
     describe('addr', async () => {
 
         it('permits setting address by owner', async () => {
-            await resolver.setAddr(node, accounts[1], {from: accounts[0]});
-            assert.equal(await resolver.addr(node), accounts[1]);
+            var tx = await resolver.methods['setAddr(bytes32,address)'](node, accounts[1], {from: accounts[0]});
+            assert.equal(tx.logs.length, 2);
+            assert.equal(tx.logs[0].event, "AddressChanged");
+            assert.equal(tx.logs[0].args.node, node);
+            assert.equal(tx.logs[0].args.newAddress, accounts[1].toLowerCase());
+            assert.equal(tx.logs[1].event, "AddrChanged");
+            assert.equal(tx.logs[1].args.node, node);
+            assert.equal(tx.logs[1].args.a, accounts[1]);
+            assert.equal(await resolver.methods['addr(bytes32)'](node), accounts[1]);
         });
 
         it('can overwrite previously set address', async () => {
-            await resolver.setAddr(node, accounts[1], {from: accounts[0]});
-            assert.equal(await resolver.addr(node), accounts[1]);
+            await resolver.methods['setAddr(bytes32,address)'](node, accounts[1], {from: accounts[0]});
+            assert.equal(await resolver.methods['addr(bytes32)'](node), accounts[1]);
 
-            await resolver.setAddr(node, accounts[0], {from: accounts[0]});
-            assert.equal(await resolver.addr(node), accounts[0]);
+            await resolver.methods['setAddr(bytes32,address)'](node, accounts[0], {from: accounts[0]});
+            assert.equal(await resolver.methods['addr(bytes32)'](node), accounts[0]);
         });
 
         it('can overwrite to same address', async () => {
-            await resolver.setAddr(node, accounts[1], {from: accounts[0]});
-            assert.equal(await resolver.addr(node), accounts[1]);
+            await resolver.methods['setAddr(bytes32,address)'](node, accounts[1], {from: accounts[0]});
+            assert.equal(await resolver.methods['addr(bytes32)'](node), accounts[1]);
 
-            await resolver.setAddr(node, accounts[1], {from: accounts[0]});
-            assert.equal(await resolver.addr(node), accounts[1]);
+            await resolver.methods['setAddr(bytes32,address)'](node, accounts[1], {from: accounts[0]});
+            assert.equal(await resolver.methods['addr(bytes32)'](node), accounts[1]);
         });
 
         it('forbids setting new address by non-owners', async () => {
 
             try {
-                await resolver.setAddr(node, accounts[1], {from: accounts[1]});
+                await resolver.methods['setAddr(bytes32,address)'](node, accounts[1], {from: accounts[1]});
             } catch (error) {
                 return utils.ensureException(error);
             }
@@ -103,10 +110,10 @@ contract('PublicResolver', function (accounts) {
 
         it('forbids writing same address by non-owners', async () => {
 
-            await resolver.setAddr(node, accounts[1], {from: accounts[0]});
+            await resolver.methods['setAddr(bytes32,address)'](node, accounts[1], {from: accounts[0]});
 
             try {
-                await resolver.setAddr(node, accounts[1], {from: accounts[1]});
+                await resolver.methods['setAddr(bytes32,address)'](node, accounts[1], {from: accounts[1]});
             } catch (error) {
                 return utils.ensureException(error);
             }
@@ -116,10 +123,10 @@ contract('PublicResolver', function (accounts) {
 
         it('forbids overwriting existing address by non-owners', async () => {
 
-            await resolver.setAddr(node, accounts[1], {from: accounts[0]});
+            await resolver.methods['setAddr(bytes32,address)'](node, accounts[1], {from: accounts[0]});
 
             try {
-                await resolver.setAddr(node, accounts[0], {from: accounts[1]});
+                await resolver.methods['setAddr(bytes32,address)'](node, accounts[0], {from: accounts[1]});
             } catch (error) {
                 return utils.ensureException(error);
             }
@@ -128,8 +135,37 @@ contract('PublicResolver', function (accounts) {
         });
 
         it('returns zero when fetching nonexistent addresses', async () => {
-            assert.equal(await resolver.addr(node), '0x0000000000000000000000000000000000000000');
+            assert.equal(await resolver.methods['addr(bytes32)'](node), '0x0000000000000000000000000000000000000000');
         });
+
+        it('permits setting and retrieving addresses for other coin types', async () => {
+          await resolver.methods['setAddr(bytes32,uint256,bytes)'](node, 123, accounts[1], {from: accounts[0]});
+          assert.equal(await resolver.methods['addr(bytes32,uint256)'](node, 123), accounts[1].toLowerCase());
+        });
+
+        it('returns ETH address for coin type 60', async () => {
+          var tx = await resolver.methods['setAddr(bytes32,address)'](node, accounts[1], {from: accounts[0]});
+          assert.equal(tx.logs.length, 2);
+          assert.equal(tx.logs[0].event, "AddressChanged");
+          assert.equal(tx.logs[0].args.node, node);
+          assert.equal(tx.logs[0].args.newAddress, accounts[1].toLowerCase());
+          assert.equal(tx.logs[1].event, "AddrChanged");
+          assert.equal(tx.logs[1].args.node, node);
+          assert.equal(tx.logs[1].args.a, accounts[1]);
+          assert.equal(await resolver.methods['addr(bytes32,uint256)'](node, 60), accounts[1].toLowerCase());
+        });
+
+        it('setting coin type 60 updates ETH address', async () => {
+          var tx = await resolver.methods['setAddr(bytes32,uint256,bytes)'](node, 60, accounts[2], {from: accounts[0]});
+          assert.equal(tx.logs.length, 2);
+          assert.equal(tx.logs[0].event, "AddressChanged");
+          assert.equal(tx.logs[0].args.node, node);
+          assert.equal(tx.logs[0].args.newAddress, accounts[2].toLowerCase());
+          assert.equal(tx.logs[1].event, "AddrChanged");
+          assert.equal(tx.logs[1].args.node, node);
+          assert.equal(tx.logs[1].args.a, accounts[2]);
+          assert.equal(await resolver.methods['addr(bytes32)'](node), accounts[2]);
+        })
     });
 
     describe('name', async () => {
@@ -553,7 +589,7 @@ contract('PublicResolver', function (accounts) {
 
         it('falls back to calling implementsInterface on addr', async () => {
             // Set addr to the resolver itself, since it has interface implementations.
-            await resolver.setAddr(node, resolver.address, {from: accounts[0]});
+            await resolver.methods['setAddr(bytes32,address)'](node, resolver.address, {from: accounts[0]});
             // Check the ID for `addr(bytes32)`
             assert.equal(await resolver.interfaceImplementer(node, "0x3b3b57de"), resolver.address);
         });
@@ -565,14 +601,14 @@ contract('PublicResolver', function (accounts) {
 
         it('returns 0 on fallback when target contract does not support implementsInterface', async () => {
             // Set addr to the ENS registry, which doesn't implement supportsInterface.
-            await resolver.setAddr(node, ens.address, {from: accounts[0]});
+            await resolver.methods['setAddr(bytes32,address)'](node, ens.address, {from: accounts[0]});
             // Check the ID for `supportsInterface(bytes4)`
             assert.equal(await resolver.interfaceImplementer(node, "0x01ffc9a7"), "0x0000000000000000000000000000000000000000");
         });
 
         it('returns 0 on fallback when target is not a contract', async () => {
             // Set addr to an externally owned account.
-            await resolver.setAddr(node, accounts[0], {from: accounts[0]});
+            await resolver.methods['setAddr(bytes32,address)'](node, accounts[0], {from: accounts[0]});
             // Check the ID for `supportsInterface(bytes4)`
             assert.equal(await resolver.interfaceImplementer(node, "0x01ffc9a7"), "0x0000000000000000000000000000000000000000");
         });
@@ -587,14 +623,14 @@ contract('PublicResolver', function (accounts) {
         it('permits authorised users to make changes', async () => {
             await resolver.setAuthorisation(node, accounts[1], true, {from: accounts[0]});
             assert.equal(await resolver.authorisations(node, await ens.owner(node), accounts[1]), true);
-            await resolver.setAddr(node, accounts[1], {from: accounts[1]});
+            await resolver.methods['setAddr(bytes32,address)'](node, accounts[1], {from: accounts[1]});
             assert.equal(await resolver.addr(node), accounts[1]);
         });
 
         it('permits authorisations to be cleared', async () => {
             await resolver.setAuthorisation(node, accounts[1], false, {from: accounts[0]});
             try {
-                await resolver.setAddr(node, accounts[0], {from: accounts[1]});
+                await resolver.methods['setAddr(bytes32,address)'](node, accounts[0], {from: accounts[1]});
             } catch (error) {
                 return utils.ensureException(error);
             }
@@ -607,7 +643,7 @@ contract('PublicResolver', function (accounts) {
 
             // The authorisation should have no effect, because accounts[1] is not the owner.
             try {
-                await resolver.setAddr(node, accounts[0], {from: accounts[2]});
+                await resolver.methods['setAddr(bytes32,address)'](node, accounts[0], {from: accounts[2]});
             } catch (error) {
                 return utils.ensureException(error);
             }
@@ -619,7 +655,7 @@ contract('PublicResolver', function (accounts) {
             await resolver.setAuthorisation(node, accounts[2], true, {from: accounts[1]});
             await ens.setOwner(node, accounts[1], {from: accounts[0]});
 
-            await resolver.setAddr(node, accounts[0], {from: accounts[2]});
+            await resolver.methods['setAddr(bytes32,address)'](node, accounts[0], {from: accounts[2]});
             assert.equal(await resolver.addr(node), accounts[0]);
         });
     });
