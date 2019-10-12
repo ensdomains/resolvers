@@ -1,6 +1,6 @@
 # Resolvers
 
-[![Build Status](https://travis-ci.org/ensdomains/resolvers.svg?branch=master)](https://travis-ci.org/ensdomains/dnssec-oracle) [![License](https://img.shields.io/badge/License-BSD--2--Clause-blue.svg)](LICENSE)
+[![Build Status](https://travis-ci.org/ensdomains/resolvers.svg?branch=master)](https://travis-ci.org/ensdomains/resolvers) [![License](https://img.shields.io/badge/License-BSD--2--Clause-blue.svg)](LICENSE)
 
 A collection of resolvers for ENS domains
 

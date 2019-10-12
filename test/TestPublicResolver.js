@@ -455,6 +455,113 @@ contract('PublicResolver', function (accounts) {
         });
     });
 
+    describe('dns', async () => {
+
+        it('permits setting name by owner', async () => {
+            // a.eth. 3600 IN A 1.2.3.4
+            const arec = '016103657468000001000100000e10000401020304';
+            // b.eth. 3600 IN A 2.3.4.5
+            const b1rec = '016203657468000001000100000e10000402030405';
+            // b.eth. 3600 IN A 3.4.5.6
+            const b2rec = '016203657468000001000100000e10000403040506';
+            // eth. 86400 IN SOA ns1.ethdns.xyz. hostmaster.test.eth. 2018061501 15620 1800 1814400 14400
+            const soarec = '03657468000006000100015180003a036e733106657468646e730378797a000a686f73746d6173746572057465737431036574680078492cbd00003d0400000708001baf8000003840';
+            const rec = '0x' + arec + b1rec + b2rec + soarec;
+
+            await resolver.setDNSRecords(node, rec, {from: accounts[0]});
+
+            assert.equal(await resolver.dnsRecord(node, sha3(dnsName('a.eth.')), 1), '0x016103657468000001000100000e10000401020304');
+            assert.equal(await resolver.dnsRecord(node, sha3(dnsName('b.eth.')), 1), '0x016203657468000001000100000e10000402030405016203657468000001000100000e10000403040506');
+            assert.equal(await resolver.dnsRecord(node, sha3(dnsName('eth.')), 6), '0x03657468000006000100015180003a036e733106657468646e730378797a000a686f73746d6173746572057465737431036574680078492cbd00003d0400000708001baf8000003840');
+        });
+
+        it('should update existing records', async() => {
+            // a.eth. 3600 IN A 4.5.6.7
+            const arec = '016103657468000001000100000e10000404050607';
+            // eth. 86400 IN SOA ns1.ethdns.xyz. hostmaster.test.eth. 2018061502 15620 1800 1814400 14400
+            const soarec = '03657468000006000100015180003a036e733106657468646e730378797a000a686f73746d6173746572057465737431036574680078492cbe00003d0400000708001baf8000003840';
+            const rec = '0x' + arec + soarec;
+
+            await resolver.setDNSRecords(node, rec, {from: accounts[0]});
+
+            assert.equal(await resolver.dnsRecord(node, sha3(dnsName('a.eth.')), 1), '0x016103657468000001000100000e10000404050607');
+            assert.equal(await resolver.dnsRecord(node, sha3(dnsName('eth.')), 6), '0x03657468000006000100015180003a036e733106657468646e730378797a000a686f73746d6173746572057465737431036574680078492cbe00003d0400000708001baf8000003840');
+        })
+
+        it('should keep track of entries', async() => {
+            // c.eth. 3600 IN A 1.2.3.4
+            const crec = '016303657468000001000100000e10000401020304';
+            const rec = '0x' + crec;
+
+            await resolver.setDNSRecords(node, rec, {from: accounts[0]});
+
+            // Initial check
+            var hasEntries = await resolver.hasDNSRecords(node, sha3(dnsName('c.eth.')));
+            assert.equal(hasEntries, true);
+            hasEntries = await resolver.hasDNSRecords(node, sha3(dnsName('d.eth.')));
+            assert.equal(hasEntries, false);
+
+            // Update with no new data makes no difference
+            await resolver.setDNSRecords(node, rec, {from: accounts[0]});
+            hasEntries = await resolver.hasDNSRecords(node, sha3(dnsName('c.eth.')));
+            assert.equal(hasEntries, true);
+
+            // c.eth. 3600 IN A
+            const crec2 = '016303657468000001000100000e100000';
+            const rec2 = '0x' + crec2;
+
+            await resolver.setDNSRecords(node, rec2, {from: accounts[0]});
+
+            // Removal returns to 0
+            hasEntries = await resolver.hasDNSRecords(node, sha3(dnsName('c.eth.')));
+            assert.equal(hasEntries, false);
+        })
+
+        it('can clear a zone', async() => {
+            // a.eth. 3600 IN A 1.2.3.4
+            const arec = '016103657468000001000100000e10000401020304';
+            const rec = '0x' + arec;
+
+            await resolver.setDNSRecords(node, rec, {from: accounts[0]});
+
+            // Ensure the record is present
+            assert.equal(await resolver.dnsRecord(node, sha3(dnsName('a.eth.')), 1), '0x016103657468000001000100000e10000401020304');
+
+            // Clear the zone
+            await resolver.clearDNSZone(node, {from: accounts[0]});
+
+            // Ensure the record is no longer present
+            assert.equal(await resolver.dnsRecord(node, sha3(dnsName('a.eth.')), 1), null);
+
+            // Ensure the record can be set again
+            await resolver.setDNSRecords(node, rec, {from: accounts[0]});
+            assert.equal(await resolver.dnsRecord(node, sha3(dnsName('a.eth.')), 1), '0x016103657468000001000100000e10000401020304');
+        })
+
+        it('should handle single-record updates', async() => {
+            // e.eth. 3600 IN A 1.2.3.4
+            const erec = '016503657468000001000100000e10000401020304';
+            const rec = '0x' + erec;
+
+            await resolver.setDNSRecords(node, rec, {from: accounts[0]});
+
+            assert.equal(await resolver.dnsRecord(node, sha3(dnsName('e.eth.')), 1), '0x016503657468000001000100000e10000401020304');
+        })
+
+
+        it('forbids setting DNS records by non-owners', async () => {
+            // f.eth. 3600 IN A 1.2.3.4
+            const frec = '016603657468000001000100000e10000401020304';
+            const rec = '0x' + frec;
+            try {
+                await resolver.setDNSRecords(node, rec, {from: accounts[1]});
+            } catch (error) {
+                return utils.ensureException(error);
+            }
+            assert.fail('set DNS records did not fail');
+        });
+    });
+
     describe('implementsInterface', async () => {
         it('permits setting interface by owner', async () => {
             await resolver.setInterface(node, "0x12345678", accounts[0], {from: accounts[0]});
@@ -553,3 +660,24 @@ contract('PublicResolver', function (accounts) {
         });
     });
 });
+
+function dnsName(name) {
+    // strip leading and trailing .
+    const n = name.replace(/^\.|\.$/gm, '');
+
+    var bufLen = (n === '') ? 1 : n.length + 2;
+    var buf = Buffer.allocUnsafe(bufLen);
+
+    offset = 0;
+    if (n.length) {
+        const list = n.split('.');
+        for (let i = 0; i < list.length; i++) {
+            const len = buf.write(list[i], offset + 1)
+                buf[offset] = len;
+                offset += len + 1;
+        }
+    }
+    buf[offset++] = 0;
+    return '0x' + buf.reduce((output, elem) => (output + ('0' + elem.toString(16)).slice(-2)), '');
+}
+

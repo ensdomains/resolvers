@@ -1,9 +1,12 @@
 {
   "name": "@ensdomains/resolver",
-  "version": "0.1.6",
+  "version": "0.1.9",
   "requires": true,
+  "main": "index.js",
   "lockfileVersion": 1,
   "devDependencies": {
+    "@ensdomains/buffer": "^0.0.10",
+    "@ensdomains/dnssec-oracle": "^0.1.2",
     "@ensdomains/ens": "^0.2.2",
     "eth-ens-namehash": "^2.0.8",
     "eth-gas-reporter": "^0.1.2",
@@ -16,7 +19,8 @@
     "test": "truffle test",
     "watch": "npm-watch",
     "lint": "solium --dir ./contracts",
-    "prepublishOnly": "truffle compile && truffle networks --clean"
+    "prepublishOnly": "truffle compile && truffle networks --clean",
+    "pub": "npm run prepublishOnly && npm publish"
   },
   "dependencies": {}
 }
