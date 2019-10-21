@@ -5,6 +5,7 @@ pragma solidity >=0.4.25;
  */
 interface Resolver{
     event AddrChanged(bytes32 indexed node, address a);
+    event AddressChanged(bytes32 indexed node, uint coinType, bytes newAddress);
     event NameChanged(bytes32 indexed node, string name);
     event ABIChanged(bytes32 indexed node, uint256 indexed contentType);
     event PubkeyChanged(bytes32 indexed node, bytes32 x, bytes32 y);
@@ -15,6 +16,7 @@ interface Resolver{
 
     function ABI(bytes32 node, uint256 contentTypes) external view returns (uint256, bytes memory);
     function addr(bytes32 node) external view returns (address);
+    function addr(bytes32 node, uint coinType) external view returns(bytes memory);
     function contenthash(bytes32 node) external view returns (bytes memory);
     function dnsrr(bytes32 node) external view returns (bytes memory);
     function name(bytes32 node) external view returns (string memory);
@@ -24,6 +26,7 @@ interface Resolver{
 
     function setABI(bytes32 node, uint256 contentType, bytes calldata data) external;
     function setAddr(bytes32 node, address addr) external;
+    function setAddr(bytes32 node, uint coinType, bytes calldata a) external;
     function setContenthash(bytes32 node, bytes calldata hash) external;
     function setDnsrr(bytes32 node, bytes calldata data) external;
     function setName(bytes32 node, string calldata _name) external;
