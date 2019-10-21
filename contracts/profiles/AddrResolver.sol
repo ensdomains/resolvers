@@ -27,7 +27,7 @@ contract AddrResolver is ResolverBase {
      * @param node The ENS node to query.
      * @return The associated address.
      */
-    function addr(bytes32 node) public view returns (address) {
+    function addr(bytes32 node) public view returns (address payable) {
         bytes memory a = addr(node, COIN_TYPE_ETH);
         if(a.length == 0) {
             return address(0);
