@@ -9,7 +9,7 @@ interface Resolver{
     event NameChanged(bytes32 indexed node, string name);
     event ABIChanged(bytes32 indexed node, uint256 indexed contentType);
     event PubkeyChanged(bytes32 indexed node, bytes32 x, bytes32 y);
-    event TextChanged(bytes32 indexed node, string indexedKey, string key);
+    event TextChanged(bytes32 indexed node, string indexed indexedKey, string key);
     event ContenthashChanged(bytes32 indexed node, bytes hash);
     /* Deprecated events */
     event ContentChanged(bytes32 indexed node, bytes32 hash);
