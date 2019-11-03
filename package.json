@@ -1,6 +1,6 @@
 {
   "name": "@ensdomains/resolver",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "requires": true,
   "main": "index.js",
   "lockfileVersion": 1,
