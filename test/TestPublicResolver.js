@@ -681,17 +681,16 @@ contract('PublicResolver', function (accounts) {
           assert.equal(await resolver.text(node, "url"), "https://ethereum.org/");
         });
 
-        // Disabled because web3 doesn't have a function for decoding the return ABI
-        // it('allows reading multiple fields', async () => {
-        //   await resolver.methods['setAddr(bytes32,address)'](node, accounts[1], {from: accounts[0]});
-        //   await resolver.setText(node, "url", "https://ethereum.org/", {from: accounts[0]});
-        //   var results = await resolver.multicall.call([
-        //     resolver.contract.methods['addr(bytes32)'](node).encodeABI(),
-        //     resolver.contract.methods.text(node, "url").encodeABI()
-        //   ]);
-        //   assert.equal(results[0], accounts[1]);
-        //   assert.equal(results[1], "https://ethereum.org/");
-        // });
+        it('allows reading multiple fields', async () => {
+          await resolver.methods['setAddr(bytes32,address)'](node, accounts[1], {from: accounts[0]});
+          await resolver.setText(node, "url", "https://ethereum.org/", {from: accounts[0]});
+          var results = await resolver.multicall.call([
+            resolver.contract.methods['addr(bytes32)'](node).encodeABI(),
+            resolver.contract.methods.text(node, "url").encodeABI()
+          ]);
+          assert.equal(web3.eth.abi.decodeParameters(['address'], results[0])[0], accounts[1]);
+          assert.equal(web3.eth.abi.decodeParameters(['string'], results[1])[0], "https://ethereum.org/");
+        });
     });
 });
 
