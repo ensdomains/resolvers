@@ -54,13 +54,13 @@ contract PublicResolver is ABIResolver, AddrResolver, ContentHashResolver, DNSRe
         return owner == msg.sender || authorisations[node][owner][msg.sender];
     }
 
-    function multicall(bytes[] calldata datas) external returns(bytes[] memory rets) {
-        rets = new bytes[](datas.length);
-        for(uint i = 0; i < datas.length; i++) {
-            (bool success, bytes memory ret) = address(this).delegatecall(datas[i]);
+    function multicall(bytes[] calldata data) external returns(bytes[] memory results) {
+        results = new bytes[](data.length);
+        for(uint i = 0; i < data.length; i++) {
+            (bool success, bytes memory result) = address(this).delegatecall(data[i]);
             require(success);
-            rets[i] = ret;
+            results[i] = result;
         }
-        return rets;
+        return results;
     }
 }
