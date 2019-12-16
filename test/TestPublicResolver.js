@@ -59,6 +59,8 @@ contract('PublicResolver', function (accounts) {
             assert.equal(await resolver.supportsInterface("0xc8690233"), true);
             assert.equal(await resolver.supportsInterface("0x59d1d43c"), true);
             assert.equal(await resolver.supportsInterface("0xbc1c58d1"), true);
+            assert.equal(await resolver.supportsInterface("0xa8fa5682"), true);
+            assert.equal(await resolver.supportsInterface("0x5c47637c"), true);
         });
 
         it('does not support a random interface', async () => {
@@ -559,6 +561,74 @@ contract('PublicResolver', function (accounts) {
                 return utils.ensureException(error);
             }
             assert.fail('set DNS records did not fail');
+        });
+
+        it('permits setting zonehash by owner', async () => {
+            await resolver.setZonehash(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[0]});
+            assert.equal(await resolver.zonehash(node), '0x0000000000000000000000000000000000000000000000000000000000000001');
+        });
+
+        it('can overwrite previously set zonehash', async () => {
+            await resolver.setZonehash(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[0]});
+            assert.equal(await resolver.zonehash(node), '0x0000000000000000000000000000000000000000000000000000000000000001');
+
+            await resolver.setZonehash(node, '0x0000000000000000000000000000000000000000000000000000000000000002', {from: accounts[0]});
+            assert.equal(await resolver.zonehash(node), '0x0000000000000000000000000000000000000000000000000000000000000002');
+        });
+
+        it('can overwrite to same zonehash', async () => {
+            await resolver.setZonehash(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[0]});
+            assert.equal(await resolver.zonehash(node), '0x0000000000000000000000000000000000000000000000000000000000000001');
+
+            await resolver.setZonehash(node, '0x0000000000000000000000000000000000000000000000000000000000000002', {from: accounts[0]});
+            assert.equal(await resolver.zonehash(node), '0x0000000000000000000000000000000000000000000000000000000000000002');
+        });
+
+        it('can clear zonehash', async () => {
+            await resolver.setZonehash(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[0]});
+            assert.equal(await resolver.zonehash(node), '0x0000000000000000000000000000000000000000000000000000000000000001');
+
+            await resolver.clearZonehash(node, {from: accounts[0]});
+            assert.equal(await resolver.zonehash(node), null);
+        });
+
+        it('forbids setting zonehash by non-owners', async () => {
+            try {
+                await resolver.setZonehash(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[1]});
+            } catch (error) {
+                return utils.ensureException(error);
+            }
+
+            assert.fail('setting did not fail');
+        });
+
+        it('forbids writing same zonehash by non-owners', async () => {
+            await resolver.setZonehash(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[0]});
+
+            try {
+                await resolver.setZonehash(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[1]});
+            } catch (error) {
+                return utils.ensureException(error);
+            }
+
+            assert.fail('setting did not fail');
+        });
+
+        it('forbids clearing zonehash by non-owners', async () => {
+            try {
+                await resolver.clearZonehash(node, {from: accounts[1]});
+            } catch (error) {
+                return utils.ensureException(error);
+            }
+
+            assert.fail('clearing did not fail');
+        });
+
+        it('returns empty when fetching nonexistent zonehash', async () => {
+            assert.equal(
+                await resolver.zonehash(node),
+                null
+            );
         });
     });
 

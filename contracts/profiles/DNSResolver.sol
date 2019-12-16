@@ -8,6 +8,7 @@ contract DNSResolver is ResolverBase {
     using BytesUtils for bytes;
 
     bytes4 constant private DNS_RECORD_INTERFACE_ID = 0xa8fa5682;
+    bytes4 constant private DNS_ZONE_INTERFACE_ID = 0x5c47637c;
 
     // DNSRecordChanged is emitted whenever a given node/name/resource's RRSET is updated.
     event DNSRecordChanged(bytes32 indexed node, bytes name, uint16 resource, bytes record);
@@ -15,6 +16,16 @@ contract DNSResolver is ResolverBase {
     event DNSRecordDeleted(bytes32 indexed node, bytes name, uint16 resource);
     // DNSZoneCleared is emitted whenever a given node's zone information is cleared.
     event DNSZoneCleared(bytes32 indexed node);
+
+    // DNSZonehashChanged is emitted whenever a given node's zone hash is updated.
+    event DNSZonehashChanged(bytes32 indexed node, bytes zonehash);
+    // DNSZonehashCleared is emitted whenever a given node's zone hash is cleared.
+    // lasthash is the last known zonehash for the node.
+    event DNSZonehashCleared(bytes32 indexed node, bytes lastzonehash);
+
+    // Zone hashes for the domains.
+    // node => contenthash
+    mapping(bytes32=>bytes) private zonehashes;
 
     // Version the mapping for each zone.  This allows users who have lost
     // track of their entries to effectively delete an entire zone by bumping
@@ -109,8 +120,41 @@ contract DNSResolver is ResolverBase {
         emit DNSZoneCleared(node);
     }
 
+    /**
+     * setZonehash sets the hash for the zone.
+     * May only be called by the owner of that node in the ENS registry.
+     * @param node The node to update.
+     * @param hash The zonehash to set
+     */
+    function setZonehash(bytes32 node, bytes calldata hash) external authorised(node) {
+        zonehashes[node] = hash;
+        emit DNSZonehashChanged(node, hash);
+    }
+
+    /**
+     * zonehash obtains the hash for the zone.
+     * @param node The ENS node to query.
+     * @return The associated contenthash.
+     */
+    function zonehash(bytes32 node) external view returns (bytes memory) {
+        return zonehashes[node];
+    }
+
+    /**
+     * clearZonehash clears the hash for the zone.
+     * May only be called by the owner of that node in the ENS registry.
+     * @param node The node to clear.
+     */
+    function clearZonehash(bytes32 node) external authorised(node) {
+        bytes memory lastZonehash = zonehashes[node];
+        delete(zonehashes[node]);
+        emit DNSZonehashCleared(node, lastZonehash);
+    }
+
     function supportsInterface(bytes4 interfaceID) public pure returns(bool) {
-        return interfaceID == DNS_RECORD_INTERFACE_ID || super.supportsInterface(interfaceID);
+        return interfaceID == DNS_RECORD_INTERFACE_ID ||
+               interfaceID == DNS_ZONE_INTERFACE_ID ||
+               super.supportsInterface(interfaceID);
     }
 
     function setDNSRRSet(
