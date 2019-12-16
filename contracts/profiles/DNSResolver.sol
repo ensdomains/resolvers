@@ -18,10 +18,7 @@ contract DNSResolver is ResolverBase {
     event DNSZoneCleared(bytes32 indexed node);
 
     // DNSZonehashChanged is emitted whenever a given node's zone hash is updated.
-    event DNSZonehashChanged(bytes32 indexed node, bytes zonehash);
-    // DNSZonehashCleared is emitted whenever a given node's zone hash is cleared.
-    // lasthash is the last known zonehash for the node.
-    event DNSZonehashCleared(bytes32 indexed node, bytes lastzonehash);
+    event DNSZonehashChanged(bytes32 indexed node, bytes lastzonehash, bytes zonehash);
 
     // Zone hashes for the domains.
     // node => contenthash
@@ -127,8 +124,9 @@ contract DNSResolver is ResolverBase {
      * @param hash The zonehash to set
      */
     function setZonehash(bytes32 node, bytes calldata hash) external authorised(node) {
+        bytes memory oldhash = zonehashes[node];
         zonehashes[node] = hash;
-        emit DNSZonehashChanged(node, hash);
+        emit DNSZonehashChanged(node, oldhash, hash);
     }
 
     /**
@@ -138,17 +136,6 @@ contract DNSResolver is ResolverBase {
      */
     function zonehash(bytes32 node) external view returns (bytes memory) {
         return zonehashes[node];
-    }
-
-    /**
-     * clearZonehash clears the hash for the zone.
-     * May only be called by the owner of that node in the ENS registry.
-     * @param node The node to clear.
-     */
-    function clearZonehash(bytes32 node) external authorised(node) {
-        bytes memory lastZonehash = zonehashes[node];
-        delete(zonehashes[node]);
-        emit DNSZonehashCleared(node, lastZonehash);
     }
 
     function supportsInterface(bytes4 interfaceID) public pure returns(bool) {
