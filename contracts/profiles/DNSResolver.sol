@@ -21,6 +21,8 @@ contract DNSResolver is ResolverBase {
     event DNSZonehashChanged(bytes32 indexed node, bytes lastzonehash, bytes zonehash);
 
     // Zone hashes for the domains.
+    // A zone hash is an EIP-1577 content hash in binary format that should point to a
+    // resource containing a single zonefile.
     // node => contenthash
     mapping(bytes32=>bytes) private zonehashes;
 
