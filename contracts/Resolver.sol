@@ -23,7 +23,6 @@ interface Resolver{
     function pubkey(bytes32 node) external view returns (bytes32 x, bytes32 y);
     function text(bytes32 node, string calldata key) external view returns (string memory);
     function interfaceImplementer(bytes32 node, bytes4 interfaceID) external view returns (address);
-
     function setABI(bytes32 node, uint256 contentType, bytes calldata data) external;
     function setAddr(bytes32 node, address addr) external;
     function setAddr(bytes32 node, uint coinType, bytes calldata a) external;
@@ -33,7 +32,6 @@ interface Resolver{
     function setPubkey(bytes32 node, bytes32 x, bytes32 y) external;
     function setText(bytes32 node, string calldata key, string calldata value) external;
     function setInterface(bytes32 node, bytes4 interfaceID, address implementer) external;
-
     function supportsInterface(bytes4 interfaceID) external pure returns (bool);
 
     /* Deprecated functions */

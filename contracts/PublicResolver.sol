@@ -1,4 +1,5 @@
 pragma solidity ^0.5.0;
+pragma experimental ABIEncoderV2;
 
 import "@ensdomains/ens/contracts/ENS.sol";
 import "./profiles/ABIResolver.sol";
@@ -51,5 +52,15 @@ contract PublicResolver is ABIResolver, AddrResolver, ContentHashResolver, DNSRe
     function isAuthorised(bytes32 node) internal view returns(bool) {
         address owner = ens.owner(node);
         return owner == msg.sender || authorisations[node][owner][msg.sender];
+    }
+
+    function multicall(bytes[] calldata data) external returns(bytes[] memory results) {
+        results = new bytes[](data.length);
+        for(uint i = 0; i < data.length; i++) {
+            (bool success, bytes memory result) = address(this).delegatecall(data[i]);
+            require(success);
+            results[i] = result;
+        }
+        return results;
     }
 }
