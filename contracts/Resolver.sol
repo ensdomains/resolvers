@@ -33,6 +33,7 @@ interface Resolver{
     function setText(bytes32 node, string calldata key, string calldata value) external;
     function setInterface(bytes32 node, bytes4 interfaceID, address implementer) external;
     function supportsInterface(bytes4 interfaceID) external pure returns (bool);
+    function multicall(bytes[] calldata data) external returns(bytes[] memory results);
 
     /* Deprecated functions */
     function content(bytes32 node) external view returns (bytes32);
