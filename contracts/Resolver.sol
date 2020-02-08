@@ -1,4 +1,5 @@
 pragma solidity >=0.4.25;
+pragma experimental ABIEncoderV2;
 
 /**
  * A generic resolver interface which includes all the functions including the ones deprecated
