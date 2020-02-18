@@ -453,6 +453,27 @@ contract('PublicResolver', function (accounts) {
                 null
             );
         });
+
+        it('can set specific contenthash type', async () => {
+            await resolver.setContenthash(node, '0x0100000000000000000000000000000000000000000000000000000000000001', '0x01', {from: accounts[0]});
+            assert.equal(await resolver.contenthash(node), '0x0100000000000000000000000000000000000000000000000000000000000001', '0x01');
+        });
+
+        it('does not overwrite other specific contenthash types', async () => {
+            await resolver.setContenthash(node, '0x0100000000000000000000000000000000000000000000000000000000000001', '0x01', {from: accounts[0]});
+            assert.equal(await resolver.contenthash(node), '0x0100000000000000000000000000000000000000000000000000000000000001', '0x01');
+
+            await resolver.setContenthash(node, '0x0200000000000000000000000000000000000000000000000000000000000002', '0x02', {from: accounts[0]});
+            assert.equal(await resolver.contenthash(node), '0x0100000000000000000000000000000000000000000000000000000000000001');
+        });
+
+        it('does not overwrite default contenthash with specific type', async () => {
+            await resolver.setContenthash(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[0]});
+            assert.equal(await resolver.contenthash(node), '0x0000000000000000000000000000000000000000000000000000000000000001');
+
+            await resolver.setContenthash(node, '0x0100000000000000000000000000000000000000000000000000000000000001', '0x01', {from: accounts[0]});
+            assert.equal(await resolver.contenthash(node), '0x0000000000000000000000000000000000000000000000000000000000000001');
+        });
     });
 
     describe('dns', async () => {
