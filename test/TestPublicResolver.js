@@ -59,6 +59,8 @@ contract('PublicResolver', function (accounts) {
             assert.equal(await resolver.supportsInterface("0xc8690233"), true);
             assert.equal(await resolver.supportsInterface("0x59d1d43c"), true);
             assert.equal(await resolver.supportsInterface("0xbc1c58d1"), true);
+            assert.equal(await resolver.supportsInterface("0xa8fa5682"), true);
+            assert.equal(await resolver.supportsInterface("0x5c47637c"), true);
         });
 
         it('does not support a random interface', async () => {
@@ -559,6 +561,79 @@ contract('PublicResolver', function (accounts) {
                 return utils.ensureException(error);
             }
             assert.fail('set DNS records did not fail');
+        });
+
+        it('permits setting zonehash by owner', async () => {
+            await resolver.setZonehash(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[0]});
+            assert.equal(await resolver.zonehash(node), '0x0000000000000000000000000000000000000000000000000000000000000001');
+        });
+
+        it('can overwrite previously set zonehash', async () => {
+            await resolver.setZonehash(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[0]});
+            assert.equal(await resolver.zonehash(node), '0x0000000000000000000000000000000000000000000000000000000000000001');
+
+            await resolver.setZonehash(node, '0x0000000000000000000000000000000000000000000000000000000000000002', {from: accounts[0]});
+            assert.equal(await resolver.zonehash(node), '0x0000000000000000000000000000000000000000000000000000000000000002');
+        });
+
+        it('can overwrite to same zonehash', async () => {
+            await resolver.setZonehash(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[0]});
+            assert.equal(await resolver.zonehash(node), '0x0000000000000000000000000000000000000000000000000000000000000001');
+
+            await resolver.setZonehash(node, '0x0000000000000000000000000000000000000000000000000000000000000002', {from: accounts[0]});
+            assert.equal(await resolver.zonehash(node), '0x0000000000000000000000000000000000000000000000000000000000000002');
+        });
+
+        it('forbids setting zonehash by non-owners', async () => {
+            try {
+                await resolver.setZonehash(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[1]});
+            } catch (error) {
+                return utils.ensureException(error);
+            }
+
+            assert.fail('setting did not fail');
+        });
+
+        it('forbids writing same zonehash by non-owners', async () => {
+            await resolver.setZonehash(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[0]});
+
+            try {
+                await resolver.setZonehash(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[1]});
+            } catch (error) {
+                return utils.ensureException(error);
+            }
+
+            assert.fail('setting did not fail');
+        });
+
+        it('returns empty when fetching nonexistent zonehash', async () => {
+            assert.equal(
+                await resolver.zonehash(node),
+                null
+            );
+        });
+
+        it('emits the correct event', async () => {
+            var tx = await resolver.setZonehash(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[0]});
+            assert.equal(tx.logs.length, 1);
+            assert.equal(tx.logs[0].event, "DNSZonehashChanged");
+            assert.equal(tx.logs[0].args.node, node);
+            assert.equal(tx.logs[0].args.lastzonehash, undefined);
+            assert.equal(tx.logs[0].args.zonehash, '0x0000000000000000000000000000000000000000000000000000000000000001');
+
+            tx = await resolver.setZonehash(node, '0x0000000000000000000000000000000000000000000000000000000000000002', {from: accounts[0]});
+            assert.equal(tx.logs.length, 1);
+            assert.equal(tx.logs[0].event, "DNSZonehashChanged");
+            assert.equal(tx.logs[0].args.node, node);
+            assert.equal(tx.logs[0].args.lastzonehash, '0x0000000000000000000000000000000000000000000000000000000000000001');
+            assert.equal(tx.logs[0].args.zonehash, '0x0000000000000000000000000000000000000000000000000000000000000002');
+
+            tx = await resolver.setZonehash(node, '0x0000000000000000000000000000000000000000000000000000000000000000', {from: accounts[0]});
+            assert.equal(tx.logs.length, 1);
+            assert.equal(tx.logs[0].event, "DNSZonehashChanged");
+            assert.equal(tx.logs[0].args.node, node);
+            assert.equal(tx.logs[0].args.lastzonehash, '0x0000000000000000000000000000000000000000000000000000000000000002');
+            assert.equal(tx.logs[0].args.zonehash, '0x0000000000000000000000000000000000000000000000000000000000000000');
         });
     });
 
