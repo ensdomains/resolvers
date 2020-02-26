@@ -456,7 +456,7 @@ contract('PublicResolver', function (accounts) {
 
         it('can set specific contenthash type', async () => {
             await resolver.methods['setContenthash(bytes32,bytes,bytes)'](node, '0x01', '0x0100000000000000000000000000000000000000000000000000000000000001', {from: accounts[0]});
-            assert.equal(await resolver.methods['contenthash(bytes32,bytes)'](node, '0x01')), '0x0100000000000000000000000000000000000000000000000000000000000001';
+            assert.equal(await resolver.methods['contenthash(bytes32,bytes)'](node, '0x01'), '0x0100000000000000000000000000000000000000000000000000000000000001');
         });
 
         it('does not overwrite other specific contenthash types', async () => {
