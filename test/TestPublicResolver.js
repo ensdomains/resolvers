@@ -1,7 +1,6 @@
 const ENS = artifacts.require('@ensdomains/ens/contracts/ENSRegistry.sol');
 const PublicResolver = artifacts.require('PublicResolver.sol');
 
-const utils = require('./helpers/Utils.js');
 const namehash = require('eth-ens-namehash');
 const sha3 = require('web3-utils').sha3;
 
