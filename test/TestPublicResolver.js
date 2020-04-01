@@ -5,6 +5,8 @@ const utils = require('./helpers/Utils.js');
 const namehash = require('eth-ens-namehash');
 const sha3 = require('web3-utils').sha3;
 
+const { exceptions } = require('@ensdomains/test-utils');
+
 contract('PublicResolver', function (accounts) {
 
     let node;
@@ -20,34 +22,24 @@ contract('PublicResolver', function (accounts) {
     describe('fallback function', async () => {
 
         it('forbids calls to the fallback function with 0 value', async () => {
-            try {
-                await web3.eth.sendTransaction({
+            await exceptions.expectFailure(
+                web3.eth.sendTransaction({
                     from: accounts[0],
                     to: resolver.address,
                     gas: 3000000
                 })
-
-            } catch (error) {
-                return utils.ensureException(error);
-            }
-
-            assert.fail('transfer did not fail');
+            );
         });
 
         it('forbids calls to the fallback function with 1 value', async () => {
-            try {
-                await web3.eth.sendTransaction({
+            await exceptions.expectFailure(
+                web3.eth.sendTransaction({
                     from: accounts[0],
                     to: resolver.address,
                     gas: 3000000,
                     value: 1
                 })
-            } catch (error) {
-                return utils.ensureException(error);
-            }
-
-            assert.fail('transfer did not fail');
-        });
+            );
     });
 
     describe('supportsInterface function', async () => {
@@ -100,40 +92,27 @@ contract('PublicResolver', function (accounts) {
         });
 
         it('forbids setting new address by non-owners', async () => {
-
-            try {
-                await resolver.methods['setAddr(bytes32,address)'](node, accounts[1], {from: accounts[1]});
-            } catch (error) {
-                return utils.ensureException(error);
-            }
-
-            assert.fail('setting did not fail');
+            await exceptions.expectFailure(
+                resolver.methods['setAddr(bytes32,address)'](node, accounts[1], {from: accounts[1]})
+            );
         });
 
         it('forbids writing same address by non-owners', async () => {
 
             await resolver.methods['setAddr(bytes32,address)'](node, accounts[1], {from: accounts[0]});
 
-            try {
-                await resolver.methods['setAddr(bytes32,address)'](node, accounts[1], {from: accounts[1]});
-            } catch (error) {
-                return utils.ensureException(error);
-            }
-
-            assert.fail('writing did not fail');
+            await exceptions.expectFailure(
+                resolver.methods['setAddr(bytes32,address)'](node, accounts[1], {from: accounts[1]})
+            );
         });
 
         it('forbids overwriting existing address by non-owners', async () => {
 
             await resolver.methods['setAddr(bytes32,address)'](node, accounts[1], {from: accounts[0]});
 
-            try {
-                await resolver.methods['setAddr(bytes32,address)'](node, accounts[0], {from: accounts[1]});
-            } catch (error) {
-                return utils.ensureException(error);
-            }
-
-            assert.fail('overwriting did not fail');
+            await exceptions.expectFailure(
+                resolver.methods['setAddr(bytes32,address)'](node, accounts[0], {from: accounts[1]})
+            );
         });
 
         it('returns zero when fetching nonexistent addresses', async () => {
@@ -186,11 +165,7 @@ contract('PublicResolver', function (accounts) {
         });
 
         it('forbids setting name by non-owners', async () => {
-            try {
-                await resolver.setName(node, 'name2', {from: accounts[1]});
-            } catch (error) {
-                return utils.ensureException(error);
-            }
+            await exceptions.expectFailure(resolver.setName(node, 'name2', {from: accounts[1]}));
         });
 
         it('returns empty when fetching nonexistent name', async () => {
@@ -269,13 +244,7 @@ contract('PublicResolver', function (accounts) {
 
             await resolver.setPubkey(node, x, y, {from: accounts[0]});
 
-            try {
-                await resolver.setPubkey(node, x, y, {from: accounts[1]});
-            } catch (error) {
-                return utils.ensureException(error);
-            }
-
-            assert.fail('setting did not fail');
+            await exceptions.expectFailure(resolver.setPubkey(node, x, y, {from: accounts[1]}));
         });
 
         it('forbids overwriting existing value by non-owners', async () => {
@@ -335,13 +304,7 @@ contract('PublicResolver', function (accounts) {
         });
 
         it('rejects invalid content types', async () => {
-            try {
-                await resolver.setABI(node, 0x3, "0x12", {from: accounts[0]})
-            } catch (error) {
-                return utils.ensureException(error);
-            }
-
-            assert.fail('setting did not fail');
+            await exceptions.expectFailure(resolver.setABI(node, 0x3, "0x12", {from: accounts[0]}));
         });
 
         it('forbids setting value by non-owners', async () => {
@@ -394,13 +357,7 @@ contract('PublicResolver', function (accounts) {
         it('forbids writing same text by non-owners', async () => {
             await resolver.setText(node, "url", url, {from: accounts[0]});
 
-            try {
-                await resolver.setText(node, "url", url, {from: accounts[1]});
-            } catch (error) {
-                return utils.ensureException(error);
-            }
-
-            assert.fail('setting did not fail');
+            await exceptions.expectFailure(resolver.setText(node, "url", url, {from: accounts[1]}));
         });
     });
 
@@ -428,25 +385,17 @@ contract('PublicResolver', function (accounts) {
         });
 
         it('forbids setting contenthash by non-owners', async () => {
-            try {
-                await resolver.setContenthash(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[1]});
-            } catch (error) {
-                return utils.ensureException(error);
-            }
-
-            assert.fail('setting did not fail');
+            await exceptions.expectFailure(
+                resolver.setContenthash(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[1]})
+            );
         });
 
         it('forbids writing same contenthash by non-owners', async () => {
             await resolver.setContenthash(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[0]});
 
-            try {
-                await resolver.setContenthash(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[1]});
-            } catch (error) {
-                return utils.ensureException(error);
-            }
-
-            assert.fail('setting did not fail');
+            await exceptions.expectFailure(
+                resolver.setContenthash(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[1]})
+            );
         });
 
         it('returns empty when fetching nonexistent contenthash', async () => {
@@ -555,12 +504,7 @@ contract('PublicResolver', function (accounts) {
             // f.eth. 3600 IN A 1.2.3.4
             const frec = '016603657468000001000100000e10000401020304';
             const rec = '0x' + frec;
-            try {
-                await resolver.setDNSRecords(node, rec, {from: accounts[1]});
-            } catch (error) {
-                return utils.ensureException(error);
-            }
-            assert.fail('set DNS records did not fail');
+            await exceptions.expectFailure(resolver.setDNSRecords(node, rec, {from: accounts[1]}));
         });
 
         it('permits setting zonehash by owner', async () => {
@@ -585,25 +529,17 @@ contract('PublicResolver', function (accounts) {
         });
 
         it('forbids setting zonehash by non-owners', async () => {
-            try {
-                await resolver.setZonehash(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[1]});
-            } catch (error) {
-                return utils.ensureException(error);
-            }
-
-            assert.fail('setting did not fail');
+            await exceptions.expectFailure(
+                resolver.setZonehash(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[1]})
+            );
         });
 
         it('forbids writing same zonehash by non-owners', async () => {
             await resolver.setZonehash(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[0]});
 
-            try {
-                await resolver.setZonehash(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[1]});
-            } catch (error) {
-                return utils.ensureException(error);
-            }
-
-            assert.fail('setting did not fail');
+            await exceptions.expectFailure(
+                resolver.setZonehash(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[1]})
+            );
         });
 
         it('returns empty when fetching nonexistent zonehash', async () => {
@@ -649,13 +585,7 @@ contract('PublicResolver', function (accounts) {
         });
 
         it('forbids setting interface by non-owner', async () => {
-            try {
-                await resolver.setInterface(node, '0x12345678', accounts[1], {from: accounts[1]});
-            } catch (error) {
-                return utils.ensureException(error);
-            }
-
-            assert.fail('setting did not fail');
+            await exceptions.expectFailure(resolver.setInterface(node, '0x12345678', accounts[1], {from: accounts[1]}));
         });
 
         it('returns 0 when fetching unset interface', async () => {
@@ -704,26 +634,16 @@ contract('PublicResolver', function (accounts) {
 
         it('permits authorisations to be cleared', async () => {
             await resolver.setAuthorisation(node, accounts[1], false, {from: accounts[0]});
-            try {
-                await resolver.methods['setAddr(bytes32,address)'](node, accounts[0], {from: accounts[1]});
-            } catch (error) {
-                return utils.ensureException(error);
-            }
-
-            assert.fail('setting did not fail');
+            await exceptions.expectFailure(resolver.methods['setAddr(bytes32,address)'](node, accounts[0], {from: accounts[1]}));
         });
 
         it('permits non-owners to set authorisations', async () => {
             await resolver.setAuthorisation(node, accounts[2], true, {from: accounts[1]});
 
             // The authorisation should have no effect, because accounts[1] is not the owner.
-            try {
-                await resolver.methods['setAddr(bytes32,address)'](node, accounts[0], {from: accounts[2]});
-            } catch (error) {
-                return utils.ensureException(error);
-            }
-
-            assert.fail('setting did not fail');
+            await exceptions.expectFailure(
+                resolver.methods['setAddr(bytes32,address)'](node, accounts[0], {from: accounts[2]})
+            );
         });
 
         it('checks the authorisation for the current owner', async () => {
