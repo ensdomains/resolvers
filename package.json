@@ -8,6 +8,7 @@
     "@ensdomains/buffer": "^0.0.10",
     "@ensdomains/dnssec-oracle": "^0.1.2",
     "@ensdomains/ens": "^0.4.2",
+    "@ensdomains/test-utils": "^1.3.0",
     "eth-ens-namehash": "^2.0.8",
     "eth-gas-reporter": "^0.1.2",
     "openzeppelin-solidity": "2.1.1",
