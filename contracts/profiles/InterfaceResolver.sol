@@ -30,7 +30,7 @@ contract InterfaceResolver is ResolverBase, AddrResolver {
      * contract implements EIP168 and returns `true` for the specified interfaceID, its address
      * will be returned.
      * @param node The ENS node to query.
-     * @param interfaceID The EIP 168 interface ID to check for.
+     * @param interfaceID The EIP 165 interface ID to check for.
      * @return The address that implements this interface, or 0 if the interface is unsupported.
      */
     function interfaceImplementer(bytes32 node, bytes4 interfaceID) external view returns (address) {
