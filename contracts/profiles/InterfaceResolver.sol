@@ -15,7 +15,7 @@ contract InterfaceResolver is ResolverBase, AddrResolver {
      * Sets an interface associated with a name.
      * Setting the address to 0 restores the default behaviour of querying the contract at `addr()` for interface support.
      * @param node The node to update.
-     * @param interfaceID The EIP 168 interface ID.
+     * @param interfaceID The EIP 165 interface ID.
      * @param implementer The address of a contract that implements this interface for this node.
      */
     function setInterface(bytes32 node, bytes4 interfaceID, address implementer) external authorised(node) {
@@ -27,7 +27,7 @@ contract InterfaceResolver is ResolverBase, AddrResolver {
      * Returns the address of a contract that implements the specified interface for this name.
      * If an implementer has not been set for this interfaceID and name, the resolver will query
      * the contract at `addr()`. If `addr()` is set, a contract exists at that address, and that
-     * contract implements EIP168 and returns `true` for the specified interfaceID, its address
+     * contract implements EIP165 and returns `true` for the specified interfaceID, its address
      * will be returned.
      * @param node The ENS node to query.
      * @param interfaceID The EIP 165 interface ID to check for.
@@ -46,7 +46,7 @@ contract InterfaceResolver is ResolverBase, AddrResolver {
 
         (bool success, bytes memory returnData) = a.staticcall(abi.encodeWithSignature("supportsInterface(bytes4)", INTERFACE_META_ID));
         if(!success || returnData.length < 32 || returnData[31] == 0) {
-            // EIP 168 not supported by target
+            // EIP 165 not supported by target
             return address(0);
         }
 
