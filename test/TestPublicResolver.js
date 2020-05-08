@@ -382,6 +382,27 @@ contract('PublicResolver', function (accounts) {
                 null
             );
         });
+
+        it('can set specific contenthash type', async () => {
+            await resolver.methods['setContenthash(bytes32,bytes,bytes)'](node, '0x01', '0x0100000000000000000000000000000000000000000000000000000000000001', {from: accounts[0]});
+            assert.equal(await resolver.methods['contenthash(bytes32,bytes)'](node, '0x01'), '0x0100000000000000000000000000000000000000000000000000000000000001');
+        });
+
+        it('does not overwrite other specific contenthash types', async () => {
+            await resolver.methods['setContenthash(bytes32,bytes,bytes)'](node, '0x01', '0x0100000000000000000000000000000000000000000000000000000000000001', {from: accounts[0]});
+            assert.equal(await resolver.methods['contenthash(bytes32,bytes)'](node, '0x01'), '0x0100000000000000000000000000000000000000000000000000000000000001');
+
+            await resolver.methods['setContenthash(bytes32,bytes,bytes)'](node, '0x02', '0x0200000000000000000000000000000000000000000000000000000000000002', {from: accounts[0]});
+            assert.equal(await resolver.methods['contenthash(bytes32,bytes)'](node, '0x01'), '0x0100000000000000000000000000000000000000000000000000000000000001');
+        });
+
+        it('does not overwrite default contenthash with specific type', async () => {
+            await resolver.setContenthash(node, '0x0000000000000000000000000000000000000000000000000000000000000001', {from: accounts[0]});
+            assert.equal(await resolver.contenthash(node), '0x0000000000000000000000000000000000000000000000000000000000000001');
+
+            await resolver.methods['setContenthash(bytes32,bytes,bytes)'](node, '0x01', '0x0100000000000000000000000000000000000000000000000000000000000001', {from: accounts[0]});
+            assert.equal(await resolver.contenthash(node), '0x0000000000000000000000000000000000000000000000000000000000000001');
+        });
     });
 
     describe('dns', async () => {
