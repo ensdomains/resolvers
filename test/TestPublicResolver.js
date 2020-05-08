@@ -665,6 +665,76 @@ contract('PublicResolver', function (accounts) {
             assert.equal(web3.eth.abi.decodeParameters(['string'], results[1])[0], "https://ethereum.org/");
         });
     });
+
+    describe('geoens', async () => {
+        var geo1 = 'ezs42bcd';
+        var geo2 = 'ezs42bdd';
+        let differentNode = namehash.hash('yeth');
+
+        it("should directly resolve a simple geohash query", async () => {
+            await resolver.setGeoAddr(node, geo1, accounts[1], {from: accounts[0]});
+
+            a = await resolver.geoAddr(node, geo1);
+            assert.equal(a[0], accounts[1], "Did not correctly resolve address on direct query");
+            assert.equal(a[1], 0, "Did not correctly resolve address on direct query");
+        });
+
+
+        it("should not resolve a non-existant geohash query", async () => {
+            await resolver.setGeoAddr(node, geo1, accounts[1], {from: accounts[0]});
+
+            a = await resolver.geoAddr(node, geo2);
+            assert.equal(a[0], 0, "Resolved a geohash which was never set in the contract");
+
+            a = await resolver.geoAddr(differentNode, geo1);
+            assert.equal(a[0], 0, "Resolved a domain which was never set in the contract");
+        });
+
+
+        it("should resolve only one geohash on direct query", async () => {
+            await resolver.setGeoAddr(node, geo1, accounts[1], {from: accounts[0]});
+            await resolver.setGeoAddr(node, geo2, accounts[2], {from: accounts[0]});
+            await ens.setSubnodeOwner('0x0', sha3('yeth'), accounts[0], {from: accounts[0]});
+            await resolver.setGeoAddr(differentNode, geo2, accounts[3], {from: accounts[0]});
+
+            a = await resolver.geoAddr(node, geo1);
+            assert.equal(a[0], accounts[1], "Did not correctly resolve address on direct query");
+            assert.equal(a[1], 0, "Did not correctly resolve address on direct query");
+
+            a = await resolver.geoAddr(node, geo2);
+            assert.equal(a[0], accounts[2], "Did not correctly resolve address on direct query");
+            assert.equal(a[1], 0, "Did not correctly resolve address on direct query");
+        });
+
+
+        it("should resolve only one geohash on indirect query", async () => {
+            await resolver.setGeoAddr(node, geo1, accounts[1], {from: accounts[0]});
+            await resolver.setGeoAddr(node, geo2, accounts[2], {from: accounts[0]});
+            await ens.setSubnodeOwner('0x0', sha3('yeth'), accounts[0], {from: accounts[0]});
+            await resolver.setGeoAddr(differentNode, geo2, accounts[3], {from: accounts[0]});
+
+            a = await resolver.geoAddr(node, 'ezs42bc');
+            assert.equal(a[0], accounts[1], "Did not correctly resolve address on indirect query");
+            assert.equal(a[1], 0, "Returned geohash that doesn't match query");
+
+            a = await resolver.geoAddr(node, 'ezs42bd');
+            assert.equal(a[0], accounts[2], "Did not correctly resolve address on indirect query");
+            assert.equal(a[1], 0, "Returned geohash that doesn't match query");
+        });
+
+
+        it("should resolve multiple geohashes on range query for a specific node", async () => {
+            await resolver.setGeoAddr(node, geo1, accounts[1], {from: accounts[0]});
+            await resolver.setGeoAddr(node, geo2, accounts[2], {from: accounts[0]});
+            await ens.setSubnodeOwner('0x0', sha3('yeth'), accounts[0], {from: accounts[0]});
+            await resolver.setGeoAddr(differentNode, geo2, accounts[3], {from: accounts[0]});
+
+            a = await resolver.geoAddr(node, 'ezs42b');
+            assert.equal(a[0], accounts[1], "Did not correctly resolve address on indirect query");
+            assert.equal(a[1], accounts[2], "Returned geohash that doesn't match query");
+            assert.equal(a[2], 0, "Returned geohash that doesn't match query");
+        });
+    });
 });
 
 function dnsName(name) {
