@@ -3,7 +3,7 @@ pragma solidity ^0.5.0;
 import "../ResolverBase.sol";
 
 contract GeoENSResolver is ResolverBase {
-    bytes4 constant ERC2390 = 0xa263115e;
+    bytes4 constant ERC2390 = 0x8fbcc5ce;
     uint constant MAX_ADDR_RETURNS = 64;
     uint constant TREE_VISITATION_QUEUESZ = 64;
     uint8 constant ASCII_0 = 48;
@@ -27,7 +27,7 @@ contract GeoENSResolver is ResolverBase {
     // length is 8 characters)
     mapping(bytes32=>Node[]) private geomap;
 
-    event GeoENSRecordChanged(bytes32 indexed node, string geohash, address addr);
+    event GeoENSRecordChanged(bytes32 indexed node, bytes8 geohash, address addr);
 
     // only 5 bits of ret value are used
     function chartobase32(byte c) pure internal returns (uint8 b) {
@@ -60,9 +60,9 @@ contract GeoENSResolver is ResolverBase {
         return b;
     }
 
-    function geoAddr(bytes32 node, string calldata geohash) external view returns (address[] memory ret) {
+    function geoAddr(bytes32 node, bytes8 geohash, uint8 precision) external view returns (address[] memory ret) {
         bytes32(node); // single node georesolver ignores node
-        require(bytes(geohash).length < 9); // 8 characters = +-1.9 meter resolution
+        assert(precision <= geohash.length);
 
         ret = new address[](MAX_ADDR_RETURNS);
         if (geomap[node].length == 0) { return ret; }
@@ -70,9 +70,9 @@ contract GeoENSResolver is ResolverBase {
 
         // walk into the geomap data structure
         uint pointer = 0; // not actual pointer but index into geomap
-        for(uint i=0; i < bytes(geohash).length; i++) {
+        for(uint8 i=0; i < precision; i++) {
 
-            uint8 c = chartobase32(bytes(geohash)[i]);
+            uint8 c = chartobase32(geohash[i]);
             uint next = geomap[node][pointer].children[c];
             if (next == 0) {
                 // nothing found for this geohash.
@@ -85,7 +85,7 @@ contract GeoENSResolver is ResolverBase {
 
         // pointer is now node representing the resolution of the query geohash.
         // DFS until all addresses found or ret[] is full.
-        // Do not use recursion because this is a blockchain...
+        // Do not use recursion because blockchain...
         uint[] memory indexes_to_visit = new uint[](TREE_VISITATION_QUEUESZ);
         indexes_to_visit[0] = pointer;
         uint front_i = 0;
@@ -97,7 +97,7 @@ contract GeoENSResolver is ResolverBase {
 
             // if not a leaf node...
             if (cur_node.data == address(0)) {
-                // visit all the chilin's
+                // visit all the chilins
                 for(uint i=0; i<cur_node.children.length; i++) {
                     // only visit valid children
                     if (cur_node.children[i] != 0) {
@@ -118,9 +118,8 @@ contract GeoENSResolver is ResolverBase {
     }
 
     // when setting, geohash must be precise to 8 digits.
-    function setGeoAddr(bytes32 node, string calldata geohash, address addr) external authorised(node) {
+    function setGeoAddr(bytes32 node, bytes8 geohash, address addr) external authorised(node) {
         bytes32(node); // single node georesolver ignores node
-        require(bytes(geohash).length == 8); // 8 characters = +-1.9 meter resolution
 
         // create root node if not yet created
         if (geomap[node].length == 0) {
@@ -133,9 +132,9 @@ contract GeoENSResolver is ResolverBase {
 
         // walk into the geomap data structure
         uint pointer = 0; // not actual pointer but index into geomap
-        for(uint i=0; i < bytes(geohash).length; i++) {
+        for(uint i=0; i < geohash.length; i++) {
 
-            uint8 c = chartobase32(bytes(geohash)[i]);
+            uint8 c = chartobase32(geohash[i]);
 
             if (geomap[node][pointer].children[c] == 0) {
                 // nothing found for this geohash.
