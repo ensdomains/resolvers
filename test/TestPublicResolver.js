@@ -173,6 +173,37 @@ contract('PublicResolver', function (accounts) {
         });
     });
 
+    describe('stealthKeys', async () => {
+        it('permits setting stealth keys by owner', async () => {
+            await resolver.setStealthKeys(node, 1, 2, {from: accounts[0]});
+            const keys = await resolver.stealthKeys(node)
+            assert.equal(keys[0].toNumber(), 1);
+            assert.equal(keys[1].toNumber(), 2);
+        });
+
+        it('can overwrite previously set keys', async () => {
+            await resolver.setStealthKeys(node, 3, 4, {from: accounts[0]});
+            const keys = await resolver.stealthKeys(node)
+            assert.equal(keys[0].toNumber(), 3);
+            assert.equal(keys[1].toNumber(), 4);
+
+            await resolver.setStealthKeys(node, 5, 6, {from: accounts[0]});
+            const keys2 = await resolver.stealthKeys(node)
+            assert.equal(keys2[0].toNumber(), 5);
+            assert.equal(keys2[1].toNumber(), 6);
+        });
+
+        it('forbids setting keys by non-owners', async () => {
+            await exceptions.expectFailure(resolver.setStealthKeys(node, 1, 2, {from: accounts[1]}));
+        });
+
+        it('returns 0 when fetching nonexistent keys', async () => {
+            const keys = await resolver.stealthKeys(node)
+            assert.equal(keys[0].toNumber(), 0);
+            assert.equal(keys[1].toNumber(), 0);
+        });
+    });
+
     describe('pubkey', async () => {
 
         it('returns empty when fetching nonexistent values', async () => {
