@@ -27,7 +27,7 @@ contract DefaultReverseResolver {
      * @dev Constructor
      * @param ensAddr The address of the ENS registry.
      */
-    constructor(ENS ensAddr) public {
+    constructor(ENS ensAddr) {
         ens = ensAddr;
 
         // Assign ownership of the reverse record to our deployer

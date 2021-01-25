@@ -5,5 +5,5 @@ pragma solidity >=0.4.25;
 import "@ensdomains/ens/contracts/ENSRegistry.sol";
 
 contract dummy {
-    constructor() public {}
+    constructor() {}
 }

@@ -1,5 +1,4 @@
-pragma solidity ^0.5.0;
-pragma experimental ABIEncoderV2;
+pragma solidity ^0.7.4;pragma experimental ABIEncoderV2;
 
 import "@ensdomains/ens/contracts/ENS.sol";
 import "./profiles/ABIResolver.sol";
@@ -28,7 +27,7 @@ contract PublicResolver is ABIResolver, AddrResolver, ContentHashResolver, DNSRe
 
     event AuthorisationChanged(bytes32 indexed node, address indexed owner, address indexed target, bool isAuthorised);
 
-    constructor(ENS _ens) public {
+    constructor(ENS _ens) {
         ens = _ens;
     }
 
@@ -49,7 +48,7 @@ contract PublicResolver is ABIResolver, AddrResolver, ContentHashResolver, DNSRe
         emit AuthorisationChanged(node, msg.sender, target, isAuthorised);
     }
 
-    function isAuthorised(bytes32 node) internal view returns(bool) {
+    function isAuthorised(bytes32 node) internal override view returns(bool) {
         address owner = ens.owner(node);
         return owner == msg.sender || authorisations[node][owner][msg.sender];
     }
@@ -62,5 +61,9 @@ contract PublicResolver is ABIResolver, AddrResolver, ContentHashResolver, DNSRe
             results[i] = result;
         }
         return results;
+    }
+
+    function supportsInterface(bytes4 interfaceID) virtual override(ABIResolver, AddrResolver, ContentHashResolver, DNSResolver, InterfaceResolver, NameResolver, PubkeyResolver, TextResolver) public pure returns(bool) {
+        return super.supportsInterface(interfaceID);
     }
 }
