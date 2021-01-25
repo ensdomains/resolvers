@@ -29,7 +29,7 @@ abstract contract StealthKeyResolver is ResolverBase {
      * Returns the stealth key associated with a name.
      * @param node The ENS node to query.
      * @return generationPubKey The public key for generating a stealth address.
-     * @return encryptionPubKey The public key for encrypting a stealth address.
+     * @return encryptionPubKey The public key to use for encryption.
      */
     function stealthKeys(bytes32 node) external view returns (uint256 generationPubKey, uint256 encryptionPubKey) {
         StealthKey memory key = _stealthKeys[node];
