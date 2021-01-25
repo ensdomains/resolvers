@@ -1,8 +1,7 @@
-pragma solidity ^0.5.0;
-
+pragma solidity ^0.7.4;
 import "../ResolverBase.sol";
 
-contract PubkeyResolver is ResolverBase {
+abstract contract PubkeyResolver is ResolverBase {
     bytes4 constant private PUBKEY_INTERFACE_ID = 0xc8690233;
 
     event PubkeyChanged(bytes32 indexed node, bytes32 x, bytes32 y);
@@ -29,13 +28,14 @@ contract PubkeyResolver is ResolverBase {
      * Returns the SECP256k1 public key associated with an ENS node.
      * Defined in EIP 619.
      * @param node The ENS node to query
-     * @return x, y the X and Y coordinates of the curve point for the public key.
+     * @return x The X coordinate of the curve point for the public key.
+     * @return y The Y coordinate of the curve point for the public key.
      */
     function pubkey(bytes32 node) external view returns (bytes32 x, bytes32 y) {
         return (pubkeys[node].x, pubkeys[node].y);
     }
 
-    function supportsInterface(bytes4 interfaceID) public pure returns(bool) {
+    function supportsInterface(bytes4 interfaceID) virtual override public pure returns(bool) {
         return interfaceID == PUBKEY_INTERFACE_ID || super.supportsInterface(interfaceID);
     }
 }

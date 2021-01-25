@@ -1,8 +1,7 @@
-pragma solidity ^0.5.0;
-
+pragma solidity ^0.7.4;
 import "../ResolverBase.sol";
 
-contract NameResolver is ResolverBase {
+abstract contract NameResolver is ResolverBase {
     bytes4 constant private NAME_INTERFACE_ID = 0x691f3431;
 
     event NameChanged(bytes32 indexed node, string name);
@@ -30,7 +29,7 @@ contract NameResolver is ResolverBase {
         return names[node];
     }
 
-    function supportsInterface(bytes4 interfaceID) public pure returns(bool) {
+    function supportsInterface(bytes4 interfaceID) virtual override public pure returns(bool) {
         return interfaceID == NAME_INTERFACE_ID || super.supportsInterface(interfaceID);
     }
 }

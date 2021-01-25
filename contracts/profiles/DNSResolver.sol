@@ -1,9 +1,8 @@
-pragma solidity ^0.5.0;
-
+pragma solidity ^0.7.4;
 import "../ResolverBase.sol";
 import "@ensdomains/dnssec-oracle/contracts/RRUtils.sol";
 
-contract DNSResolver is ResolverBase {
+abstract contract DNSResolver is ResolverBase {
     using RRUtils for *;
     using BytesUtils for bytes;
 
@@ -140,7 +139,7 @@ contract DNSResolver is ResolverBase {
         return zonehashes[node];
     }
 
-    function supportsInterface(bytes4 interfaceID) public pure returns(bool) {
+    function supportsInterface(bytes4 interfaceID) virtual override public pure returns(bool) {
         return interfaceID == DNS_RECORD_INTERFACE_ID ||
                interfaceID == DNS_ZONE_INTERFACE_ID ||
                super.supportsInterface(interfaceID);
