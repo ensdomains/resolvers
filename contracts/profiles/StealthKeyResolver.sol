@@ -18,7 +18,7 @@ abstract contract StealthKeyResolver is ResolverBase {
      * May only be called by the owner of that node in the ENS registry.
      * @param node The node to update.
      * @param generationPubKey The public key for generating a stealth address
-     * @param encryptionPubKey The public key for encrypting the generated address
+     * @param encryptionPubKey The public key to use for encryption
      */
     function setStealthKeys(bytes32 node, uint256 generationPubKey, uint256 encryptionPubKey) external authorised(node) {
         _stealthKeys[node] = StealthKey(generationPubKey, encryptionPubKey);
