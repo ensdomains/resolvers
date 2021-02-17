@@ -174,33 +174,46 @@ contract('PublicResolver', function (accounts) {
     });
 
     describe('stealthKeys', async () => {
+        const SPENDING_KEY = 10;
+        const VIEWING_KEY = 20;
+
         it('permits setting stealth keys by owner', async () => {
-            await resolver.setStealthKeys(node, 1, 2, {from: accounts[0]});
+            await resolver.setStealthKeys(node, 2, SPENDING_KEY, 2, VIEWING_KEY, {from: accounts[0]});
             const keys = await resolver.stealthKeys(node)
-            assert.equal(keys[0].toNumber(), 1);
-            assert.equal(keys[1].toNumber(), 2);
+            assert.equal(keys[0].toNumber(), 2);
+            assert.equal(keys[1].toNumber(), SPENDING_KEY);
+            assert.equal(keys[2].toNumber(), 2);
+            assert.equal(keys[3].toNumber(), VIEWING_KEY);
         });
 
         it('can overwrite previously set keys', async () => {
-            await resolver.setStealthKeys(node, 3, 4, {from: accounts[0]});
-            const keys = await resolver.stealthKeys(node)
+            await resolver.setStealthKeys(node, 3, SPENDING_KEY, 2, VIEWING_KEY, {from: accounts[0]});
+            let keys = await resolver.stealthKeys(node)
             assert.equal(keys[0].toNumber(), 3);
-            assert.equal(keys[1].toNumber(), 4);
+            assert.equal(keys[1].toNumber(), SPENDING_KEY);
+            assert.equal(keys[2].toNumber(), 2);
+            assert.equal(keys[3].toNumber(), VIEWING_KEY);
 
-            await resolver.setStealthKeys(node, 5, 6, {from: accounts[0]});
-            const keys2 = await resolver.stealthKeys(node)
-            assert.equal(keys2[0].toNumber(), 5);
-            assert.equal(keys2[1].toNumber(), 6);
+            await resolver.setStealthKeys(node, 2, SPENDING_KEY + 1, 3, VIEWING_KEY + 1, {from: accounts[0]});
+            keys = await resolver.stealthKeys(node)
+            assert.equal(keys[0].toNumber(), 2);
+            assert.equal(keys[1].toNumber(), SPENDING_KEY + 1);
+            assert.equal(keys[2].toNumber(), 3);
+            assert.equal(keys[3].toNumber(), VIEWING_KEY + 1);
         });
 
         it('forbids setting keys by non-owners', async () => {
-            await exceptions.expectFailure(resolver.setStealthKeys(node, 1, 2, {from: accounts[1]}));
+            await exceptions.expectFailure(
+                resolver.setStealthKeys(node, 2, SPENDING_KEY, 2, VIEWING_KEY, {from: accounts[1]})
+            );
         });
 
         it('returns 0 when fetching nonexistent keys', async () => {
             const keys = await resolver.stealthKeys(node)
-            assert.equal(keys[0].toNumber(), 0);
+            assert.equal(keys[0].toNumber(), 3);
             assert.equal(keys[1].toNumber(), 0);
+            assert.equal(keys[2].toNumber(), 3);
+            assert.equal(keys[3].toNumber(), 0);
         });
     });
 
