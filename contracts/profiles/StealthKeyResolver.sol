@@ -4,9 +4,25 @@ import "../ResolverBase.sol";
 abstract contract StealthKeyResolver is ResolverBase {
     bytes4 constant private STEALTH_KEY_INTERFACE_ID = 0x69a76591;
 
+    /// @dev Event emitted when a user updates their resolver stealth keys
     event StealthKeyChanged(bytes32 indexed node, uint256 spendingPubKeyPrefix, uint256 spendingPubKey, uint256 viewingPubKeyPrefix, uint256 viewingPubKey);
 
-    // node => prefix => key
+    /**
+     * @dev Mapping used to store two secp256k1 curve public keys useful for
+     * receiving stealth payments. The mapping records two keys: a viewing
+     * key and a spending key, which can be set and read via the `setsStealthKeys`
+     * and `stealthKey` methods respectively.
+     *
+     * The mapping associates the node to another mapping, which itself maps
+     * the public key prefix to the actual key . This scheme is used to avoid using an
+     * extra storage slot for the public key prefix. For a given node, the mapping
+     * may contain a spending key at position 0 or 1, and a viewing key at position
+     * 2 or 3. See the setter/getter methods for details of how these map to prefixes.
+     *
+     * For more on secp256k1 public keys and prefixes generally, see:
+     * https://github.com/ethereumbook/ethereumbook/blob/develop/04keys-addresses.asciidoc#generating-a-public-key
+     *
+     */
     mapping(bytes32 => mapping(uint256 => uint256)) _stealthKeys;
 
     /**
