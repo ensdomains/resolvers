@@ -41,15 +41,18 @@ abstract contract StealthKeyResolver is ResolverBase {
             "StealthKeyResolver: Invalid Prefix"
         );
 
-        delete _stealthKeys[node][0];
-        delete _stealthKeys[node][1];
-        delete _stealthKeys[node][2];
-        delete _stealthKeys[node][3];
-
-        _stealthKeys[node][spendingPubKeyPrefix - 2] = spendingPubKey;
-        _stealthKeys[node][viewingPubKeyPrefix] = viewingPubKey;
-
         emit StealthKeyChanged(node, spendingPubKeyPrefix, spendingPubKey, viewingPubKeyPrefix, viewingPubKey);
+
+        // Shift the spending key prefix down by 2, making it the appropriate index of 0 or 1
+        spendingPubKeyPrefix -= 2;
+
+        // Ensure the opposite prefix indices are empty
+        delete _stealthKeys[node][1 - spendingPubKeyPrefix];
+        delete _stealthKeys[node][5 - viewingPubKeyPrefix];
+
+        // Set the appropriate indices to the new key values
+        _stealthKeys[node][spendingPubKeyPrefix] = spendingPubKey;
+        _stealthKeys[node][viewingPubKeyPrefix] = viewingPubKey;
     }
 
     /**
