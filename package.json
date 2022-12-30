@@ -15,7 +15,7 @@
     "eth-gas-reporter": "^0.1.2",
     "openzeppelin-solidity": "3.3.0",
     "solium": "^1.2.5",
-    "truffle": "^5.1.63",
+    "truffle": "^5.7.1",
     "truffle-plugin-verify": "^0.5.4",
     "web3-utils": "^1.0.0-beta.31"
   },
